@@ -267,6 +267,10 @@ public class AccountResponse extends BaseResponse implements ResourceLimitAndCou
     @Param(description = "Base64 string representation of the resource icon", since = "4.16.0.0")
     ResourceIconResponse icon;
 
+    @SerializedName("guestnetworklimit")
+    @Param(description = "the total number of guest networks the account can own", since = "3.0.1")
+    private String guestnetworkLimit;
+
     @Override
     public String getObjectId() {
         return id;
@@ -502,6 +506,11 @@ public class AccountResponse extends BaseResponse implements ResourceLimitAndCou
     @Override
     public void setPrimaryStorageLimit(String primaryStorageLimit) {
         this.primaryStorageLimit = primaryStorageLimit;
+    }
+    
+    @Override
+    public void setGuestnetworkLimit(String guestnetworkLimit) {
+        this.guestnetworkLimit = guestnetworkLimit;
     }
 
     @Override

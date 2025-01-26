@@ -29,6 +29,8 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.naming.ConfigurationException;
 
+import com.cloud.network.Network.GuestType;
+import com.cloud.network.dao.NetworkVO;
 import org.apache.cloudstack.acl.SecurityChecker.AccessType;
 import org.apache.cloudstack.context.CallContext;
 import org.apache.cloudstack.engine.subsystem.api.storage.ObjectInDataStoreStateMachine;
@@ -239,6 +241,7 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
             accountResourceLimitMap.put(Resource.ResourceType.memory, Long.parseLong(_configDao.getValue(Config.DefaultMaxAccountMemory.key())));
             accountResourceLimitMap.put(Resource.ResourceType.primary_storage, Long.parseLong(_configDao.getValue(Config.DefaultMaxAccountPrimaryStorage.key())));
             accountResourceLimitMap.put(Resource.ResourceType.secondary_storage, MaxAccountSecondaryStorage.value());
+            accountResourceLimitMap.put(Resource.ResourceType.guest_network, Long.parseLong(_configDao.getValue(Config.DefaultMaxAccountGuestNetworks.key())));
 
             domainResourceLimitMap.put(Resource.ResourceType.public_ip, Long.parseLong(_configDao.getValue(Config.DefaultMaxDomainPublicIPs.key())));
             domainResourceLimitMap.put(Resource.ResourceType.snapshot, Long.parseLong(_configDao.getValue(Config.DefaultMaxDomainSnapshots.key())));
@@ -903,6 +906,8 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
             newCount = _snapshotDao.countSnapshotsForAccount(accountId);
         } else if (type == Resource.ResourceType.public_ip) {
             newCount = calculatePublicIpForAccount(accountId);
+        } else if (type == ResourceType.guest_network) {
+            newCount = _networkDao.listNetworksByAccountType(accountId);
         } else if (type == Resource.ResourceType.template) {
             newCount = _vmTemplateDao.countTemplatesForAccount(accountId);
         } else if (type == Resource.ResourceType.project) {

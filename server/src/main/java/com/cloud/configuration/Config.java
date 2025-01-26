@@ -1297,6 +1297,14 @@ public enum Config {
             "20",
             "The default maximum number of public IPs that can be consumed by an account",
             null),
+    DefaultMaxAccountGuestNetworks(
+            "Account Defaults",
+            ManagementServer.class,
+            Long.class,
+            "max.account.guest.networks",
+            "3",
+            "The default maximum number of guest networks that can be consumed by an account",
+            null),
     DefaultMaxAccountTemplates(
             "Account Defaults",
             ManagementServer.class,
