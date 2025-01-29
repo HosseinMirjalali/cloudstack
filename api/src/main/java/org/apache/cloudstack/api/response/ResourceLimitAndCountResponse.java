@@ -48,6 +48,8 @@ public interface ResourceLimitAndCountResponse {
 
     public void setPrimaryStorageLimit(String primaryStorageLimit);
 
+    public void setGuestnetworkLimit(String primaryStorageLimit);
+
     public void setPrimaryStorageTotal(Long primaryStorageTotal);
 
     public void setPrimaryStorageAvailable(String primaryStorageAvailable);
