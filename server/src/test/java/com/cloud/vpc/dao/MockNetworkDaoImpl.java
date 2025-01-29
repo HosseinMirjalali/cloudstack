@@ -217,6 +217,11 @@ public class MockNetworkDaoImpl extends GenericDaoBase<NetworkVO, Long> implemen
     }
 
     @Override
+    public Long listNetworksByAccountType(long accountId) {
+        return 0L;
+    }
+
+    @Override
     public List<NetworkVO> listRedundantNetworks() {
         return null;
     }
