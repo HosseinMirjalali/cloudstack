@@ -17,7 +17,7 @@
 
 # Build example: docker build -t <name> .
 
-FROM node:lts-stretch AS build
+FROM node:12.22.12 AS build
 
 MAINTAINER "Apache CloudStack" <dev@cloudstack.apache.org>
 LABEL Description="Apache CloudStack UI; Modern role-base progressive UI for Apache CloudStack"
@@ -31,7 +31,7 @@ RUN apt-get -y update && apt-get -y upgrade
 
 COPY . /build/
 RUN npm install
-RUN npm run build
+RUN npm run start
 
 FROM nginx:alpine AS runtime
 
