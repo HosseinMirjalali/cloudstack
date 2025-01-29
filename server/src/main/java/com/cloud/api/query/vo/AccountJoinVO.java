@@ -147,6 +147,12 @@ public class AccountJoinVO extends BaseViewVO implements InternalIdentity, Ident
     @Column(name = "networkTotal")
     private Long networkTotal;
 
+    @Column(name = "guestnetworkLimit")
+    private Long guestnetworkLimit;
+
+    @Column(name = "guestnetworkTotal")
+    private Long guestnetworkTotal;
+
     @Column(name = "vpcLimit")
     private Long vpcLimit;
 
@@ -313,6 +319,10 @@ public class AccountJoinVO extends BaseViewVO implements InternalIdentity, Ident
         return networkTotal;
     }
 
+    public Long getGuestNetworkTotal() {
+        return guestnetworkTotal;
+    }
+
     public Long getVpcTotal() {
         return vpcTotal;
     }
@@ -359,6 +369,10 @@ public class AccountJoinVO extends BaseViewVO implements InternalIdentity, Ident
 
     public Long getNetworkLimit() {
         return networkLimit;
+    }
+
+    public Long getGuestNetworkLimit() {
+        return guestnetworkLimit;
     }
 
     public Long getVpcLimit() {

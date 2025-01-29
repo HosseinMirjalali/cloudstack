@@ -240,6 +240,15 @@ public class AccountJoinDaoImpl extends GenericDaoBase<AccountJoinVO, Long> impl
         response.setSecondaryStorageLimit(secondaryStorageLimitDisplay);
         response.setSecondaryStorageTotal(secondaryStorageTotal);
         response.setSecondaryStorageAvailable(secondaryStorageAvail);
+
+        //get resource limits for networks
+        long guestnetworkLimit = ApiDBUtils.findCorrectResourceLimit(account.getGuestNetworkLimit(), account.getId(), ResourceType.guest_network);
+        String guestnetworkLimitDisplay = (fullView || networkLimit == -1) ? "Unlimited" : String.valueOf(guestnetworkLimit);
+        long guestnetworkTotal = (account.getGuestNetworkLimit() == null) ? 0 : account.getGuestNetworkLimit();
+        String guestnetworkAvail = (fullView || networkLimit == -1) ? "Unlimited" : String.valueOf(networkLimit - networkTotal);
+        response.setNetworkLimit(guestnetworkLimitDisplay);
+        response.setNetworkTotal(guestnetworkTotal);
+        response.setNetworkAvailable(guestnetworkAvail);
     }
 
     @Override

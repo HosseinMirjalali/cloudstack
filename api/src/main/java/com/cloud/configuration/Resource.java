@@ -17,7 +17,6 @@
 package com.cloud.configuration;
 
 public interface Resource {
-
     short RESOURCE_UNLIMITED = -1;
     String UNLIMITED = "Unlimited";
 
@@ -33,7 +32,8 @@ public interface Resource {
         cpu("cpu", 8),
         memory("memory", 9),
         primary_storage("primary_storage", 10),
-        secondary_storage("secondary_storage", 11);
+        secondary_storage("secondary_storage", 11),
+        guest_network("guest_network", 12, ResourceOwnerType.Account, ResourceOwnerType.Domain);
 
         private String name;
         private int ordinal;

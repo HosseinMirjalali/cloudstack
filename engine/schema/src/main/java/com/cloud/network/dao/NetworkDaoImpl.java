@@ -83,6 +83,7 @@ public class NetworkDaoImpl extends GenericDaoBase<NetworkVO, Long>implements Ne
     GenericSearchBuilder<NetworkVO, Long> VpcNetworksCount;
     SearchBuilder<NetworkVO> OfferingAccountNetworkSearch;
     SearchBuilder<NetworkVO> PersistentNetworkSearch;
+    GenericSearchBuilder<NetworkVO, Long> GuestNetworksCount;
 
     GenericSearchBuilder<NetworkVO, Long> GarbageCollectedSearch;
     SearchBuilder<NetworkVO> PrivateNetworkSearch;
@@ -701,13 +702,22 @@ public class NetworkDaoImpl extends GenericDaoBase<NetworkVO, Long>implements Ne
     @Override
     public List<NetworkVO> listNetworksByAccount(final long accountId, final long zoneId, final Network.GuestType type, final boolean isSystem) {
         final SearchCriteria<NetworkVO> sc = OfferingAccountNetworkSearch.create();
-        sc.setJoinParameters("ntwkOfferingSearch", "isSystem", isSystem);
         sc.setJoinParameters("ntwkAccountSearch", "accountId", accountId);
         sc.setParameters("zoneId", zoneId);
         sc.setParameters("type", type);
 
         final List<NetworkVO> networks = search(sc, null);
         return networks;
+    }
+
+    @Override
+    public Long listNetworksByAccountType(long accountId) {
+        final SearchCriteria<Long> sc = GuestNetworksCount.create();
+        sc.setJoinParameters("ntwkOfferingSearch", "isSystem", false);
+        sc.setJoinParameters("ntwkAccountSearch", "accountId", accountId);
+        sc.setParameters("type", GuestType.Shared);
+
+        return customSearch(sc, null).get(0);
     }
 
     @Override

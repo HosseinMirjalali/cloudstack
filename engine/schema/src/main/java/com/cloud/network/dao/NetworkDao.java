@@ -109,6 +109,8 @@ public interface NetworkDao extends GenericDao<NetworkVO, Long>, StateDao<State,
 
     List<NetworkVO> listNetworksByAccount(long accountId, long zoneId, Network.GuestType type, boolean isSystem);
 
+    Long listNetworksByAccountType(long accountId);
+
     List<NetworkVO> listRedundantNetworks();
 
     List<NetworkVO> listVpcNetworks();

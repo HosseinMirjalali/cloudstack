@@ -45,7 +45,7 @@ public class ResourceLimitResponse extends BaseResponse implements ControlledEnt
     private String domainPath;
 
     @SerializedName(ApiConstants.RESOURCE_TYPE)
-    @Param(description = "resource type. Values include 0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11. See the resourceType parameter for more information on these values.")
+    @Param(description = "resource type. Values include 0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12. See the resourceType parameter for more information on these values.")
     private String resourceType;
 
     @SerializedName(ApiConstants.RESOURCE_TYPE_NAME)
