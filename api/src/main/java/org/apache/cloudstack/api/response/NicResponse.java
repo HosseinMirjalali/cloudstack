@@ -134,6 +134,18 @@ public class NicResponse extends BaseResponse {
     @Param(description = "IP addresses associated with NIC found for unmanaged VM", since="4.14.0")
     private List<String> ipAddresses;
 
+    @SerializedName(ApiConstants.MTU)
+    @Param(description = "MTU configured on the NIC", since="4.18.0")
+    private Integer mtu;
+
+    @SerializedName(ApiConstants.PUBLIC_IP_ID)
+    @Param(description = "public IP address id associated with this nic via Static nat rule")
+    private String publicIpId;
+
+    @SerializedName(ApiConstants.PUBLIC_IP)
+    @Param(description = "public IP address associated with this nic via Static nat rule")
+    private String publicIp;
+
     public void setVmId(String vmId) {
         this.vmId = vmId;
     }
@@ -373,8 +385,8 @@ public class NicResponse extends BaseResponse {
         this.ipAddresses = ipAddresses;
     }
 
-    public String getVpcId() {
-        return vpcId;
+    public Integer getMtu() {
+        return mtu;
     }
 
     public void setVpcId(String vpcId) {
@@ -387,5 +399,21 @@ public class NicResponse extends BaseResponse {
 
     public void setVpcName(String vpcName) {
         this.vpcName = vpcName;
+    }
+
+    public void setMtu(Integer mtu) {
+        this.mtu = mtu;
+    }
+
+    public String getVpcId() {
+        return vpcId;
+    }
+
+    public void setPublicIpId(String publicIpId) {
+        this.publicIpId = publicIpId;
+    }
+
+    public void setPublicIp(String publicIp) {
+        this.publicIp = publicIp;
     }
 }

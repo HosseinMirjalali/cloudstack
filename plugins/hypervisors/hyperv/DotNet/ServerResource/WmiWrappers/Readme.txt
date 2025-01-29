@@ -1,4 +1,4 @@
-﻿Classes were generated on a hyper-v server using the Visual Studio GUI, but you can do the same using
+Classes were generated on a hyper-v server using the Visual Studio GUI, but you can do the same using
 mgmtclassgen.exe.  Below are some examples:
 
 mgmtclassgen.exe Msvm_ComputerSystem /N root\virtualization /L CS /O CloudStack.Plugin.WmiWrappers /P ComputerSystem.cs
@@ -14,7 +14,3 @@ ALSO, you have to tweak the generated code to expose useful details such as the 
 E.g. the generated code creates a wrapper called class ComputerSystem for WMI objects of class Msvm_ComputerSystem.
 Thus, there is a mismatch in the class name and the corresponding WMI class, and the WMI class name is a private
 constant static member.  The tweak involves making this member public.
-
-
-
-

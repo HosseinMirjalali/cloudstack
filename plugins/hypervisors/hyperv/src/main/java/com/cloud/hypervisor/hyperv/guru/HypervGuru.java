@@ -34,7 +34,6 @@ import com.cloud.hypervisor.hyperv.manager.HypervManager;
 import com.cloud.network.NetworkModel;
 import com.cloud.network.Networks.BroadcastDomainType;
 import com.cloud.network.Networks.TrafficType;
-import com.cloud.network.dao.NetworkDao;
 import com.cloud.network.dao.NetworkVO;
 import com.cloud.storage.GuestOSVO;
 import com.cloud.storage.dao.GuestOSDao;
@@ -51,8 +50,7 @@ public class HypervGuru extends HypervisorGuruBase implements HypervisorGuru {
     @Inject
     private GuestOSDao _guestOsDao;
     @Inject HypervManager _hypervMgr;
-    @Inject NetworkDao _networkDao;
-    @Inject NetworkModel _networkMgr;
+    @Inject NetworkModel networkModel;
     int MaxNicSupported = 8;
     @Override
     public final HypervisorType getHypervisorType() {
@@ -109,7 +107,7 @@ public class HypervGuru extends HypervisorGuruBase implements HypervisorGuru {
                     profile = controlNicProfile;
                 }
 
-                NetworkVO network = _networkDao.findById(networkId);
+                NetworkVO network = networkDao.findById(networkId);
                 // for Hyperv Hot Nic plug is not supported and it will support upto 8 nics.
                 // creating the VR with extra nics (actual nics(3) + extra nics) will be 8
                 for(; i < MaxNicSupported; i++) {
@@ -122,10 +120,10 @@ public class HypervGuru extends HypervisorGuruBase implements HypervisorGuru {
                     nicTo.setName(profile.getName());
 
                     try {
-                        String mac = _networkMgr.getNextAvailableMacAddressInNetwork(networkId);
+                        String mac = networkModel.getNextAvailableMacAddressInNetwork(networkId);
                         nicTo.setMac(mac);
                     } catch (InsufficientAddressCapacityException e) {
-                        throw new CloudRuntimeException("unable to allocate mac address on network: " + networkId);
+                        throw new CloudRuntimeException(String.format("unable to allocate mac address on network: %s", network.getUuid()));
                     }
                     nicTo.setDns1(profile.getIPv4Dns1());
                     nicTo.setDns2(profile.getIPv4Dns2());
@@ -138,7 +136,7 @@ public class HypervGuru extends HypervisorGuruBase implements HypervisorGuru {
                     nicTo.setBroadcastUri(profile.getBroadCastUri());
                     nicTo.setIsolationuri(profile.getIsolationUri());
 
-                    Integer networkRate = _networkMgr.getNetworkRate(network.getId(), null);
+                    Integer networkRate = networkModel.getNetworkRate(network.getId(), null);
                     nicTo.setNetworkRateMbps(networkRate);
 
                     expandedNics[i] = nicTo;

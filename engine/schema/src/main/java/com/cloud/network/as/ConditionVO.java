@@ -33,6 +33,7 @@ import org.apache.cloudstack.api.Identity;
 import org.apache.cloudstack.api.InternalIdentity;
 
 import com.cloud.utils.db.GenericDao;
+import org.apache.cloudstack.utils.reflectiontostringbuilderutils.ReflectionToStringBuilderUtils;
 
 @Entity
 @Table(name = "conditions")
@@ -44,7 +45,7 @@ public class ConditionVO implements Condition, Identity, InternalIdentity {
     private long id;
 
     @Column(name = "counter_id")
-    private long counterid;
+    private long counterId;
 
     @Column(name = "threshold")
     private long threshold;
@@ -71,8 +72,8 @@ public class ConditionVO implements Condition, Identity, InternalIdentity {
     public ConditionVO() {
     }
 
-    public ConditionVO(long counterid, long threshold, long accountId, long domainId, Operator relationalOperator) {
-        this.counterid = counterid;
+    public ConditionVO(long counterId, long threshold, long accountId, long domainId, Operator relationalOperator) {
+        this.counterId = counterId;
         this.threshold = threshold;
         this.relationalOperator = relationalOperator;
         this.accountId = accountId;
@@ -91,12 +92,14 @@ public class ConditionVO implements Condition, Identity, InternalIdentity {
 
     @Override
     public String toString() {
-        return new StringBuilder("Condition[").append("id-").append(id).append("]").toString();
+        return String.format("Condition %s",
+                ReflectionToStringBuilderUtils.reflectOnlySelectedFields(
+                        this, "id", "uuid"));
     }
 
     @Override
-    public long getCounterid() {
-        return counterid;
+    public long getCounterId() {
+        return counterId;
     }
 
     @Override
@@ -138,4 +141,11 @@ public class ConditionVO implements Condition, Identity, InternalIdentity {
         return null;
     }
 
+    public void setThreshold(long threshold) {
+        this.threshold = threshold;
+    }
+
+    public void setRelationalOperator(Operator relationalOperator) {
+        this.relationalOperator = relationalOperator;
+    }
 }

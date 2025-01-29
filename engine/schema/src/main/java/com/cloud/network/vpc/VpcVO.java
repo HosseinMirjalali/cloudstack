@@ -28,6 +28,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.cloud.utils.db.GenericDao;
+import org.apache.cloudstack.utils.reflectiontostringbuilderutils.ReflectionToStringBuilderUtils;
 
 @Entity
 @Table(name = "vpc")
@@ -89,6 +90,21 @@ public class VpcVO implements Vpc {
     @Column(name = "region_level_vpc")
     boolean regionLevelVpc = false;
 
+    @Column(name = "public_mtu")
+    Integer publicMtu;
+
+    @Column(name = "dns1")
+    String ip4Dns1;
+
+    @Column(name = "dns2")
+    String ip4Dns2;
+
+    @Column(name = "ip6Dns1")
+    String ip6Dns1;
+
+    @Column(name = "ip6Dns2")
+    String ip6Dns2;
+
     @Transient
     boolean rollingRestart = false;
 
@@ -97,8 +113,9 @@ public class VpcVO implements Vpc {
     }
 
     public VpcVO(final long zoneId, final String name, final String displayText, final long accountId, final long domainId,
-            final long vpcOffId, final String cidr, final String networkDomain, final boolean useDistributedRouter,
-            final boolean regionLevelVpc, final boolean isRedundant) {
+                 final long vpcOffId, final String cidr, final String networkDomain, final boolean useDistributedRouter,
+                 final boolean regionLevelVpc, final boolean isRedundant, final String ip4Dns1, final String ip4Dns2,
+                 final String ip6Dns1, final String ip6Dns2) {
         this.zoneId = zoneId;
         this.name = name;
         this.displayText = displayText;
@@ -112,6 +129,10 @@ public class VpcVO implements Vpc {
         usesDistributedRouter = useDistributedRouter;
         this.regionLevelVpc = regionLevelVpc;
         redundant = isRedundant;
+        this.ip4Dns1 = ip4Dns1;
+        this.ip4Dns2 = ip4Dns2;
+        this.ip6Dns1 = ip6Dns1;
+        this.ip6Dns2 = ip6Dns2;
     }
 
     @Override
@@ -137,6 +158,10 @@ public class VpcVO implements Vpc {
     @Override
     public String getCidr() {
         return cidr;
+    }
+
+    public void setCidr(String cidr) {
+        this.cidr = cidr;
     }
 
     @Override
@@ -186,8 +211,9 @@ public class VpcVO implements Vpc {
 
     @Override
     public String toString() {
-        final StringBuilder buf = new StringBuilder("[VPC [");
-        return buf.append(id).append("-").append(name).append("]").toString();
+        return String.format("VPC %s",
+                ReflectionToStringBuilderUtils.reflectOnlySelectedFields(
+                        this, "id", "uuid", "name"));
     }
 
     @Override
@@ -254,5 +280,33 @@ public class VpcVO implements Vpc {
     @Override
     public boolean usesDistributedRouter() {
         return usesDistributedRouter;
+    }
+
+    public Integer getPublicMtu() {
+        return publicMtu;
+    }
+
+    public void setPublicMtu(Integer publicMtu) {
+        this.publicMtu = publicMtu;
+    }
+
+    @Override
+    public String getIp4Dns1() {
+        return ip4Dns1;
+    }
+
+    @Override
+    public String getIp4Dns2() {
+        return ip4Dns2;
+    }
+
+    @Override
+    public String getIp6Dns1() {
+        return ip6Dns1;
+    }
+
+    @Override
+    public String getIp6Dns2() {
+        return ip6Dns2;
     }
 }

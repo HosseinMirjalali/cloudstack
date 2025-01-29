@@ -19,6 +19,8 @@ package com.cloud.template;
 import java.util.Date;
 import java.util.Map;
 
+import com.cloud.cpu.CPU;
+import com.cloud.user.UserData;
 import org.apache.cloudstack.acl.ControlledEntity;
 import org.apache.cloudstack.api.Identity;
 import org.apache.cloudstack.api.InternalIdentity;
@@ -142,4 +144,11 @@ public interface VirtualMachineTemplate extends ControlledEntity, Identity, Inte
     Date getUpdated();
 
     boolean isDeployAsIs();
+
+    Long getUserDataId();
+
+    UserData.UserDataOverridePolicy getUserDataOverridePolicy();
+
+    CPU.CPUArch getArch();
+
 }

@@ -40,57 +40,95 @@ public interface CapacityManager {
     static final String StorageCapacityDisableThresholdCK = "pool.storage.capacity.disablethreshold";
     static final String StorageOverprovisioningFactorCK = "storage.overprovisioning.factor";
     static final String StorageAllocatedCapacityDisableThresholdCK = "pool.storage.allocated.capacity.disablethreshold";
-    static final String VmwareCreateCloneFullCK = "vmware.create.full.clone";
+    static final String StorageAllocatedCapacityDisableThresholdForVolumeResizeCK = "pool.storage.allocated.resize.capacity.disablethreshold";
 
-    static final ConfigKey<Float> CpuOverprovisioningFactor = new ConfigKey<Float>(Float.class, CpuOverprovisioningFactorCK, "Advanced", "1.0",
-        "Used for CPU overprovisioning calculation; available CPU will be (actualCpuCapacity * cpu.overprovisioning.factor)", true, ConfigKey.Scope.Cluster, null);
-    static final ConfigKey<Float> MemOverprovisioningFactor = new ConfigKey<Float>(Float.class, MemOverprovisioningFactorCK, "Advanced", "1.0",
-        "Used for memory overprovisioning calculation", true, ConfigKey.Scope.Cluster, null);
-    static final ConfigKey<Double> StorageCapacityDisableThreshold = new ConfigKey<Double>("Alert", Double.class, StorageCapacityDisableThresholdCK, "0.85",
-        "Percentage (as a value between 0 and 1) of storage utilization above which allocators will disable using the pool for low storage available.", true,
-        ConfigKey.Scope.Zone);
-    static final ConfigKey<Double> StorageOverprovisioningFactor = new ConfigKey<Double>("Storage", Double.class, StorageOverprovisioningFactorCK, "2",
-        "Used for storage overprovisioning calculation; available storage will be (actualStorageSize * storage.overprovisioning.factor)", true, ConfigKey.Scope.StoragePool);
+    static final ConfigKey<Float> CpuOverprovisioningFactor =
+            new ConfigKey<>(
+                    Float.class,
+                    CpuOverprovisioningFactorCK,
+                    ConfigKey.CATEGORY_ADVANCED,
+                    "1.0",
+                    "Used for CPU overprovisioning calculation; available CPU will be (actualCpuCapacity * cpu.overprovisioning.factor)",
+                    true,
+                    ConfigKey.Scope.Cluster,
+                    null);
+    static final ConfigKey<Float> MemOverprovisioningFactor =
+            new ConfigKey<>(
+                    Float.class,
+                    MemOverprovisioningFactorCK,
+                    ConfigKey.CATEGORY_ADVANCED,
+                    "1.0",
+                    "Used for memory overprovisioning calculation",
+                    true,
+                    ConfigKey.Scope.Cluster,
+                    null);
+    static final ConfigKey<Double> StorageCapacityDisableThreshold =
+            new ConfigKey<>(
+                    ConfigKey.CATEGORY_ALERT,
+                    Double.class,
+                    StorageCapacityDisableThresholdCK,
+                    "0.85",
+                    "Percentage (as a value between 0 and 1) of storage utilization above which allocators will disable using the pool for low storage available.",
+                    true,
+                    ConfigKey.Scope.Zone);
+    static final ConfigKey<Double> StorageOverprovisioningFactor =
+            new ConfigKey<>(
+                    "Storage",
+                    Double.class,
+                    StorageOverprovisioningFactorCK,
+                    "2",
+                    "Used for storage overprovisioning calculation; available storage will be (actualStorageSize * storage.overprovisioning.factor)",
+                    true,
+                    ConfigKey.Scope.StoragePool);
     static final ConfigKey<Double> StorageAllocatedCapacityDisableThreshold =
-        new ConfigKey<Double>(
-            "Alert",
-            Double.class,
-            StorageAllocatedCapacityDisableThresholdCK,
-            "0.85",
-            "Percentage (as a value between 0 and 1) of allocated storage utilization above which allocators will disable using the pool for low allocated storage available.",
-            true, ConfigKey.Scope.Zone);
+            new ConfigKey<>(
+                    ConfigKey.CATEGORY_ALERT,
+                    Double.class,
+                    StorageAllocatedCapacityDisableThresholdCK,
+                    "0.85",
+                    "Percentage (as a value between 0 and 1) of allocated storage utilization above which allocators will disable using the pool for low allocated storage available.",
+                    true,
+                    ConfigKey.Scope.Zone);
     static final ConfigKey<Boolean> StorageOperationsExcludeCluster =
-            new ConfigKey<Boolean>(
+            new ConfigKey<>(
                     Boolean.class,
                     "cluster.storage.operations.exclude",
-                    "Advanced",
+                    ConfigKey.CATEGORY_ADVANCED,
                     "false",
                     "Exclude cluster from storage operations",
                     true,
                     ConfigKey.Scope.Cluster,
                     null);
-    static final ConfigKey<Boolean> VmwareCreateCloneFull =
-            new ConfigKey<Boolean>(
-                    "Storage",
-                    Boolean.class,
-                    VmwareCreateCloneFullCK,
-                    "false",
-                    "If set to true, creates VMs as full clones on ESX hypervisor",
-                    true,
-                    ConfigKey.Scope.StoragePool);
     static final ConfigKey<String> ImageStoreNFSVersion =
-            new ConfigKey<String>(
+            new ConfigKey<>(
                     String.class,
                     "secstorage.nfs.version",
-                    "Advanced",
+                    ConfigKey.CATEGORY_ADVANCED,
                     null,
                     "Enforces specific NFS version when mounting Secondary Storage. If NULL default selection is performed",
                     true,
                     ConfigKey.Scope.ImageStore,
                     null);
 
-    static final ConfigKey<Float> SecondaryStorageCapacityThreshold = new ConfigKey<Float>("Advanced", Float.class, "secondary.storage.capacity.threshold", "0.90",
-            "Percentage (as a value between 0 and 1) of secondary storage capacity threshold.", true);
+    static final ConfigKey<Float> SecondaryStorageCapacityThreshold =
+            new ConfigKey<>(
+                    ConfigKey.CATEGORY_ADVANCED,
+                    Float.class,
+                    "secondary.storage.capacity.threshold",
+                    "0.90",
+                    "Percentage (as a value between 0 and 1) of secondary storage capacity threshold.",
+                    true);
+
+    static final ConfigKey<Double> StorageAllocatedCapacityDisableThresholdForVolumeSize =
+            new ConfigKey<>(
+                    ConfigKey.CATEGORY_ALERT,
+                    Double.class,
+                    StorageAllocatedCapacityDisableThresholdForVolumeResizeCK,
+                    "0.90",
+                    "Percentage (as a value between 0 and 1) of allocated storage utilization above which allocators will disable using the pool for volume resize. " +
+                            "This is applicable only when volume.resize.allowed.beyond.allocation is set to true.",
+                    true,
+                    ConfigKey.Scope.Zone);
 
     public boolean releaseVmCapacity(VirtualMachine vm, boolean moveFromReserved, boolean moveToReservered, Long hostId);
 
@@ -102,7 +140,7 @@ public interface CapacityManager {
      * @param ram required RAM
      * @param cpuOverprovisioningFactor factor to apply to the actual host cpu
      */
-    boolean checkIfHostHasCapacity(long hostId, Integer cpu, long ram, boolean checkFromReservedCapacity, float cpuOverprovisioningFactor, float memoryOvercommitRatio,
+    boolean checkIfHostHasCapacity(Host host, Integer cpu, long ram, boolean checkFromReservedCapacity, float cpuOverprovisioningFactor, float memoryOvercommitRatio,
         boolean considerReservedCapacity);
 
     void updateCapacityForHost(Host host);
@@ -133,7 +171,7 @@ public interface CapacityManager {
     boolean checkIfHostHasCpuCapability(long hostId, Integer cpuNum, Integer cpuSpeed);
 
     /**
-     * Check if cluster will cross threshold if the cpu/memory requested are accomodated
+     * Check if cluster will cross threshold if the cpu/memory requested are accommodated
      * @param clusterId the clusterId to check
      * @param cpuRequested cpu requested
      * @param ramRequested cpu requested

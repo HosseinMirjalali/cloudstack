@@ -34,6 +34,7 @@ import javax.persistence.Transient;
 
 import com.cloud.offering.DiskOffering;
 import com.cloud.utils.db.GenericDao;
+import org.apache.cloudstack.utils.reflectiontostringbuilderutils.ReflectionToStringBuilderUtils;
 
 @Entity
 @Table(name = "disk_offering")
@@ -129,6 +130,8 @@ public class DiskOfferingVO implements DiskOffering {
     @Column(name = "iops_write_rate_max_length")
     private Long iopsWriteRateMaxLength;
 
+    @Column(name = "encrypt")
+    private boolean encrypt;
 
     @Column(name = "cache_mode", updatable = true, nullable = false)
     @Enumerated(value = EnumType.STRING)
@@ -568,9 +571,16 @@ public class DiskOfferingVO implements DiskOffering {
         return hypervisorSnapshotReserve;
     }
 
+    @Override
+    public boolean getEncrypt() { return encrypt; }
+
+    @Override
+    public void setEncrypt(boolean encrypt) { this.encrypt = encrypt; }
+
     public boolean isShared() {
         return !useLocalStorage;
     }
+
 
     public boolean getDiskSizeStrictness() {
         return diskSizeStrictness;
@@ -578,5 +588,12 @@ public class DiskOfferingVO implements DiskOffering {
 
     public void setDiskSizeStrictness(boolean diskSizeStrictness) {
         this.diskSizeStrictness = diskSizeStrictness;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("DiskOffering %s.",
+                ReflectionToStringBuilderUtils.reflectOnlySelectedFields(
+                        this, "id", "uuid", "name"));
     }
 }

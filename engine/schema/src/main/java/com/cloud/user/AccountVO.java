@@ -18,6 +18,7 @@ package com.cloud.user;
 
 import com.cloud.utils.db.GenericDao;
 import org.apache.cloudstack.acl.RoleType;
+import org.apache.cloudstack.utils.reflectiontostringbuilderutils.ReflectionToStringBuilderUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -75,6 +76,9 @@ public class AccountVO implements Account {
 
     @Column(name = "default")
     boolean isDefault;
+
+    @Column(name = "api_key_access")
+    private Boolean apiKeyAccess;
 
     public AccountVO() {
         uuid = UUID.randomUUID().toString();
@@ -189,7 +193,7 @@ public class AccountVO implements Account {
 
     @Override
     public String toString() {
-        return String.format("Acct[%s-%s] -- Account {\"id\": %s, \"name\": \"%s\", \"uuid\": \"%s\"}", uuid, accountName, id, accountName, uuid);
+        return String.format("Account [%s]", ReflectionToStringBuilderUtils.reflectOnlySelectedFields(this, "uuid","accountName", "id"));
     }
 
     @Override
@@ -223,5 +227,19 @@ public class AccountVO implements Account {
     @Override
     public String getName() {
         return accountName;
+    }
+
+    public String reflectionToString() {
+        return ReflectionToStringBuilderUtils.reflectOnlySelectedFields(this, "id", "uuid", "accountName", "domainId");
+    }
+
+    @Override
+    public void setApiKeyAccess(Boolean apiKeyAccess) {
+        this.apiKeyAccess = apiKeyAccess;
+    }
+
+    @Override
+    public Boolean getApiKeyAccess() {
+        return apiKeyAccess;
     }
 }

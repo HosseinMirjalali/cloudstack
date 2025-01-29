@@ -25,7 +25,7 @@
       showSearch
       optionFilterProp="label"
       :filterOption="(input, option) => {
-        return option.children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+        return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
       }"
       @change="changeAccount"
       @focus="fetchData" >
@@ -42,7 +42,7 @@
         </a-tooltip>
       </template>
 
-      <a-select-option v-for="(account, index) in samlAccounts" :key="index">
+      <a-select-option v-for="(account, index) in samlAccounts" :key="index" :label="`${account.accountName} (${account.domainName})`">
         {{ `${account.accountName} (${account.domainName})` }}
       </a-select-option>
     </a-select>
@@ -73,7 +73,7 @@ export default {
       const samlAccounts = []
       const getNextPage = () => {
         this.loading = true
-        api('listAndSwitchSamlAccount', { listAll: true, details: 'min', page: page, pageSize: 500 }).then(json => {
+        api('listAndSwitchSamlAccount', { details: 'min', page: page, pageSize: 500 }).then(json => {
           if (json && json.listandswitchsamlaccountresponse && json.listandswitchsamlaccountresponse.samluseraccount) {
             samlAccounts.push(...json.listandswitchsamlaccountresponse.samluseraccount)
           }

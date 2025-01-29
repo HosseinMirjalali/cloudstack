@@ -32,7 +32,9 @@ import javax.persistence.Table;
 import org.apache.cloudstack.api.Identity;
 import org.apache.cloudstack.api.InternalIdentity;
 
+import com.cloud.network.Network;
 import com.cloud.utils.db.GenericDao;
+import org.apache.cloudstack.utils.reflectiontostringbuilderutils.ReflectionToStringBuilderUtils;
 
 @Entity
 @Table(name = "counter")
@@ -62,19 +64,25 @@ public class CounterVO implements Counter, Identity, InternalIdentity {
     @Column(name = GenericDao.CREATED_COLUMN)
     Date created;
 
+    @Column(name = "provider")
+    private String provider;
+
     public CounterVO() {
     }
 
-    public CounterVO(Source source, String name, String value) {
+    public CounterVO(Source source, String name, String value, Network.Provider provider) {
         this.source = source;
         this.name = name;
         this.value = value;
         this.uuid = UUID.randomUUID().toString();
+        this.provider = provider.getName();
     }
 
     @Override
     public String toString() {
-        return new StringBuilder("Counter[").append("id-").append(id).append("]").toString();
+        return String.format("Counter %s",
+                ReflectionToStringBuilderUtils.reflectOnlySelectedFields(
+                        this, "id", "uuid", "name"));
     }
 
     @Override
@@ -108,5 +116,10 @@ public class CounterVO implements Counter, Identity, InternalIdentity {
 
     public Date getCreated() {
         return created;
+    }
+
+    @Override
+    public String getProvider() {
+        return provider;
     }
 }

@@ -67,7 +67,7 @@ public class UserResponse extends BaseResponse implements SetResourceIconRespons
     @Param(description = "the account type of the user")
     private Integer accountType;
 
-    @SerializedName("usersource")
+    @SerializedName(ApiConstants.USER_SOURCE)
     @Param(description = "the source type of the user in lowercase, such as native, ldap, saml2")
     private String userSource;
 
@@ -119,6 +119,18 @@ public class UserResponse extends BaseResponse implements SetResourceIconRespons
     @SerializedName(ApiConstants.RESOURCE_ICON)
     @Param(description = "Base64 string representation of the resource icon", since = "4.16.0.0")
     ResourceIconResponse icon;
+
+    @SerializedName(ApiConstants.IS_2FA_ENABLED)
+    @Param(description = "true if user has two factor authentication enabled", since = "4.18.0.0")
+    private Boolean is2FAenabled;
+
+    @SerializedName(ApiConstants.IS_2FA_MANDATED)
+    @Param(description = "true if user has two factor authentication is mandated", since = "4.18.0.0")
+    private Boolean is2FAmandated;
+
+    @SerializedName(ApiConstants.API_KEY_ACCESS)
+    @Param(description = "whether api key access is Enabled, Disabled or set to Inherit (it inherits the value from the parent)", since = "4.20.1.0")
+    ApiConstants.ApiKeyAccess apiKeyAccess;
 
     @Override
     public String getObjectId() {
@@ -284,5 +296,25 @@ public class UserResponse extends BaseResponse implements SetResourceIconRespons
     @Override
     public void setResourceIconResponse(ResourceIconResponse icon) {
         this.icon = icon;
+    }
+
+    public Boolean is2FAenabled() {
+        return is2FAenabled;
+    }
+
+    public void set2FAenabled(Boolean is2FAenabled) {
+        this.is2FAenabled = is2FAenabled;
+    }
+
+    public Boolean getIs2FAmandated() {
+        return is2FAmandated;
+    }
+
+    public void set2FAmandated(Boolean is2FAmandated) {
+        this.is2FAmandated = is2FAmandated;
+    }
+
+    public void setApiKeyAccess(Boolean apiKeyAccess) {
+        this.apiKeyAccess = ApiConstants.ApiKeyAccess.fromBoolean(apiKeyAccess);
     }
 }

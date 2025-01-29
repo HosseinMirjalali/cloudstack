@@ -33,6 +33,7 @@ import javax.persistence.TemporalType;
 import org.apache.cloudstack.api.InternalIdentity;
 
 import com.cloud.utils.db.GenericDao;
+import org.apache.cloudstack.utils.reflectiontostringbuilderutils.ReflectionToStringBuilderUtils;
 
 @Entity
 @Table(name = "autoscale_policies")
@@ -46,6 +47,9 @@ public class AutoScalePolicyVO implements AutoScalePolicy, InternalIdentity {
 
     @Column(name = "uuid")
     String uuid;
+
+    @Column(name = "name")
+    String name;
 
     @Column(name = "domain_id")
     private long domainId;
@@ -61,10 +65,10 @@ public class AutoScalePolicyVO implements AutoScalePolicy, InternalIdentity {
 
     @Column(name = "last_quiet_time", updatable = true)
     @Temporal(value = TemporalType.TIMESTAMP)
-    private Date lastQuiteTime;
+    private Date lastQuietTime;
 
     @Column(name = "action", updatable = false, nullable = false)
-    private String action;
+    private Action action;
 
     @Column(name = GenericDao.REMOVED_COLUMN)
     protected Date removed;
@@ -75,20 +79,23 @@ public class AutoScalePolicyVO implements AutoScalePolicy, InternalIdentity {
     public AutoScalePolicyVO() {
     }
 
-    public AutoScalePolicyVO(long domainId, long accountId, int duration,
-            int quietTime, Date lastQuiteTime, String action) {
+    public AutoScalePolicyVO(String name, long domainId, long accountId, int duration,
+            int quietTime, Date lastQuietTime, Action action) {
         uuid = UUID.randomUUID().toString();
+        this.name = name;
         this.domainId = domainId;
         this.accountId = accountId;
         this.duration = duration;
         this.quietTime = quietTime;
-        this.lastQuiteTime = lastQuiteTime;
+        this.lastQuietTime = lastQuietTime;
         this.action = action;
     }
 
     @Override
     public String toString() {
-        return new StringBuilder("AutoScalePolicy[").append("id-").append(id).append("]").toString();
+        return String.format("AutoScalePolicy %s.",
+                ReflectionToStringBuilderUtils.reflectOnlySelectedFields(
+                        this, "id", "uuid", "name"));
     }
 
     @Override
@@ -122,12 +129,12 @@ public class AutoScalePolicyVO implements AutoScalePolicy, InternalIdentity {
     }
 
     @Override
-    public Date getLastQuiteTime() {
-        return lastQuiteTime;
+    public Date getLastQuietTime() {
+        return lastQuietTime;
     }
 
     @Override
-    public String getAction() {
+    public Action getAction() {
         return action;
     }
 
@@ -147,8 +154,8 @@ public class AutoScalePolicyVO implements AutoScalePolicy, InternalIdentity {
         this.quietTime = quietTime;
     }
 
-    public void setLastQuiteTime(Date lastQuiteTime) {
-        this.lastQuiteTime = lastQuiteTime;
+    public void setLastQuietTime(Date lastQuietTime) {
+        this.lastQuietTime = lastQuietTime;
     }
 
     @Override
@@ -158,7 +165,10 @@ public class AutoScalePolicyVO implements AutoScalePolicy, InternalIdentity {
 
     @Override
     public String getName() {
-        return null;
+        return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
 }

@@ -2,17 +2,25 @@
 
 Dockerfiles used to build CloudStack images are available on Docker hub.
 
-
 ## Using images from docker-hub
-
 
 ### CloudStack Simulator
 
 CloudStack Simulator is an all in one CloudStack Build including the simulator that mimic Hypervisor. This is useful to test CloudStack API behavior without having to deploy real hypervisor nodes. CloudStack Simulator is used for tests and CI.
 
 ```
-docker pull cloudstack/simulator
-docker run --name simulator -p 8080:5050 -d cloudstack/simulator
+docker pull apache/cloudstack-simulator
+
+or pull it with a particular build tag
+
+docker pull apache/cloudstack-simulator:4.17.2.0
+
+docker run --name simulator -p 8080:5050 -d apache/cloudstack-simulator
+
+or
+
+docker run --name simulator -p 8080:5050 -d apache/cloudstack-simulator:4.17.2.0
+
 ```
 
 Access CloudStack UI
@@ -38,7 +46,7 @@ Log into the simulator:
 docker exec -it simulator bash
 ```
 
-### CloudStack Management-server 
+### CloudStack Management-server
 
 ```
 docker pull mysql:5.5
@@ -63,7 +71,7 @@ Deploy Cloud using marvin:
 docker run -ti --rm --link simulator:8096 cloudstack/marvin python /marvin/marvin/deployDataCenter.py -i /marvin/dev/advanced.cfg
 ```
 
-Perform Smoke tests against CloudStack Simulator containter:
+Perform Smoke tests against CloudStack Simulator container:
 ```
 docker run -ti --rm --link simulator:8096 \
   nosetests-2.7 -v --with-marvin \
@@ -79,7 +87,6 @@ docker run -ti --rm --link simulator:8096 \
 # How to build images
 
 Image provided by CloudStack are automatically built by Jenkins performing following tasks:
-
 
 ### CentOS 6
 
@@ -103,7 +110,6 @@ tag:latest = main branch
    docker stop cloudstack
    docker commit -m "init system.iso" -a "Apache CloudStack" cloudstack cloudstack/management_centos6
    ```
-
 
 ### Marvin
 

@@ -16,8 +16,10 @@
 // under the License.
 package com.cloud.user;
 
+import java.util.List;
 import java.util.Map;
 
+import com.cloud.utils.Pair;
 import org.apache.cloudstack.acl.ControlledEntity;
 import org.apache.cloudstack.acl.RoleType;
 import org.apache.cloudstack.acl.SecurityChecker.AccessType;
@@ -33,6 +35,7 @@ import com.cloud.network.vpc.VpcOffering;
 import com.cloud.offering.DiskOffering;
 import com.cloud.offering.NetworkOffering;
 import com.cloud.offering.ServiceOffering;
+import org.apache.cloudstack.auth.UserTwoFactorAuthenticator;
 
 public interface AccountService {
 
@@ -67,6 +70,8 @@ public interface AccountService {
     Account getActiveAccountByName(String accountName, Long domainId);
 
     UserAccount getActiveUserAccount(String username, Long domainId);
+
+    List<UserAccount> getActiveUserAccountByEmail(String email, Long domainId);
 
     UserAccount updateUser(UpdateUserCmd updateUserCmd);
 
@@ -112,6 +117,8 @@ public interface AccountService {
 
     void checkAccess(Account account, AccessType accessType, boolean sameOwner, String apiName, ControlledEntity... entities) throws PermissionDeniedException;
 
+    void validateAccountHasAccessToResource(Account account, AccessType accessType, Object resource);
+
     Long finalyzeAccountId(String accountName, Long domainId, Long projectId, boolean enabledOnly);
 
     /**
@@ -121,7 +128,21 @@ public interface AccountService {
      */
     UserAccount getUserAccountById(Long userId);
 
-    public Map<String, String> getKeys(GetUserKeysCmd cmd);
+    public Pair<Boolean, Map<String, String>> getKeys(GetUserKeysCmd cmd);
 
-    public Map<String, String> getKeys(Long userId);
+    public Pair<Boolean, Map<String, String>> getKeys(Long userId);
+
+    /**
+     * Lists user two-factor authentication provider plugins
+     * @return list of providers
+     */
+    List<UserTwoFactorAuthenticator> listUserTwoFactorAuthenticationProviders();
+
+    /**
+     * Finds user two factor authenticator provider by domain ID
+     * @param domainId domain id
+     * @return backup provider
+     */
+    UserTwoFactorAuthenticator getUserTwoFactorAuthenticationProvider(final Long domainId);
+
 }

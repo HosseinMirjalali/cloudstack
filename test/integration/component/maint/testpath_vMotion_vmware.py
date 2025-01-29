@@ -797,7 +797,7 @@ class TestStorageLiveMigrationVmware(cloudstackTestCase):
     def GetDestinationHostLocal(self, hostsToavoid, vm, scope):
         """
         This method gives us the destination host to which VM will be migrated
-        It takes the souce host i.e. hostsToavoid as input
+        It takes the source host i.e. hostsToavoid as input
         """
         destinationHost = None
         destinationCluster = None
@@ -1190,7 +1190,7 @@ class TestStorageLiveMigrationVmware(cloudstackTestCase):
         a) Create VM snapshots to check data integrity - @method used : VmSnapshotToCheckDataIntegrity(self, vm)
         c) Check for VM accessibility by sshing to the VM - @method used : check_for_vm_access_by_ssh_using_nat(self, virtual_machine_1)
         """
-        if  not self.zone.localstorageenabled:
+        if not self.zone.localstorageenabled:
             raise self.skipTest("The setup doesn't have local storage enabled")
         scope = first_value
         ostype = second_value

@@ -28,10 +28,10 @@ import com.cloud.utils.db.GenericDaoBase;
 import com.cloud.utils.db.GenericSearchBuilder;
 import com.cloud.utils.db.SearchBuilder;
 import com.cloud.utils.db.SearchCriteria;
+import com.cloud.utils.db.SearchCriteria.Func;
 import com.cloud.utils.db.SearchCriteria.Op;
 import org.apache.commons.lang3.StringUtils;
 import com.cloud.utils.db.TransactionLegacy;
-import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.sql.PreparedStatement;
@@ -41,9 +41,8 @@ import java.util.List;
 
 @Component
 public class AccountDaoImpl extends GenericDaoBase<AccountVO, Long> implements AccountDao {
-    private static final Logger s_logger = Logger.getLogger(AccountDaoImpl.class);
-    private static final String FIND_USER_ACCOUNT_BY_API_KEY = "SELECT u.id, u.username, u.account_id, u.secret_key, u.state, "
-        + "a.id, a.account_name, a.type, a.role_id, a.domain_id, a.state " + "FROM `cloud`.`user` u, `cloud`.`account` a "
+    private static final String FIND_USER_ACCOUNT_BY_API_KEY = "SELECT u.id, u.username, u.account_id, u.secret_key, u.state, u.api_key_access, "
+        + "a.id, a.account_name, a.type, a.role_id, a.domain_id, a.state, a.api_key_access " + "FROM `cloud`.`user` u, `cloud`.`account` a "
         + "WHERE u.account_id = a.id AND u.api_key = ? and u.removed IS NULL";
 
     protected final SearchBuilder<AccountVO> AllFieldsSearch;
@@ -54,6 +53,7 @@ public class AccountDaoImpl extends GenericDaoBase<AccountVO, Long> implements A
     protected final SearchBuilder<AccountVO> NonProjectAccountSearch;
     protected final SearchBuilder<AccountVO> AccountByRoleSearch;
     protected final GenericSearchBuilder<AccountVO, Long> AccountIdsSearch;
+    protected final GenericSearchBuilder<AccountVO, Long> ActiveDomainCount;
 
     public AccountDaoImpl() {
         AllFieldsSearch = createSearchBuilder();
@@ -101,6 +101,13 @@ public class AccountDaoImpl extends GenericDaoBase<AccountVO, Long> implements A
         AccountByRoleSearch = createSearchBuilder();
         AccountByRoleSearch.and("roleId", AccountByRoleSearch.entity().getRoleId(), SearchCriteria.Op.EQ);
         AccountByRoleSearch.done();
+
+        ActiveDomainCount = createSearchBuilder(Long.class);
+        ActiveDomainCount.select(null, Func.COUNT, null);
+        ActiveDomainCount.and("domain", ActiveDomainCount.entity().getDomainId(), SearchCriteria.Op.EQ);
+        ActiveDomainCount.and("state", ActiveDomainCount.entity().getState(), SearchCriteria.Op.EQ);
+        ActiveDomainCount.groupBy(ActiveDomainCount.entity().getDomainId());
+        ActiveDomainCount.done();
     }
 
     @Override
@@ -141,18 +148,30 @@ public class AccountDaoImpl extends GenericDaoBase<AccountVO, Long> implements A
                 u.setAccountId(rs.getLong(3));
                 u.setSecretKey(DBEncryptionUtil.decrypt(rs.getString(4)));
                 u.setState(State.getValueOf(rs.getString(5)));
+                boolean apiKeyAccess = rs.getBoolean(6);
+                if (rs.wasNull()) {
+                    u.setApiKeyAccess(null);
+                } else {
+                    u.setApiKeyAccess(apiKeyAccess);
+                }
 
-                AccountVO a = new AccountVO(rs.getLong(6));
-                a.setAccountName(rs.getString(7));
-                a.setType(Account.Type.getFromValue(rs.getInt(8)));
-                a.setRoleId(rs.getLong(9));
-                a.setDomainId(rs.getLong(10));
-                a.setState(State.getValueOf(rs.getString(11)));
+                AccountVO a = new AccountVO(rs.getLong(7));
+                a.setAccountName(rs.getString(8));
+                a.setType(Account.Type.getFromValue(rs.getInt(9)));
+                a.setRoleId(rs.getLong(10));
+                a.setDomainId(rs.getLong(11));
+                a.setState(State.getValueOf(rs.getString(12)));
+                apiKeyAccess = rs.getBoolean(13);
+                if (rs.wasNull()) {
+                    a.setApiKeyAccess(null);
+                } else {
+                    a.setApiKeyAccess(apiKeyAccess);
+                }
 
                 userAcctPair = new Pair<User, Account>(u, a);
             }
         } catch (Exception e) {
-            s_logger.warn("Exception finding user/acct by api key: " + apiKey, e);
+            logger.warn("Exception finding user/acct by api key: " + apiKey, e);
         }
         return userAcctPair;
     }
@@ -291,7 +310,7 @@ public class AccountDaoImpl extends GenericDaoBase<AccountVO, Long> implements A
         if (!account.getNeedsCleanup()) {
             account.setNeedsCleanup(true);
             if (!update(accountId, account)) {
-                s_logger.warn("Failed to mark account id=" + accountId + " for cleanup");
+                logger.warn("Failed to mark account {} for cleanup", account);
             }
         }
     }
@@ -311,12 +330,17 @@ public class AccountDaoImpl extends GenericDaoBase<AccountVO, Long> implements A
             domain_id = account_vo.getDomainId();
         }
         catch (Exception e) {
-            s_logger.warn("getDomainIdForGivenAccountId: Exception :" + e.getMessage());
+            logger.warn("getDomainIdForGivenAccountId: Exception :" + e.getMessage());
         }
         finally {
             return domain_id;
         }
     }
 
-
+    @Override
+    public int getActiveDomains() {
+        SearchCriteria<Long> sc = ActiveDomainCount.create();
+        sc.setParameters("state", "enabled");
+        return customSearch(sc, null).size();
+    }
 }

@@ -16,11 +16,48 @@
 // under the License.
 package com.cloud.network.as;
 
+import com.cloud.user.Account;
+import org.apache.cloudstack.framework.config.ConfigKey;
+
 public interface AutoScaleManager extends AutoScaleService {
 
-    void cleanUpAutoScaleResources(Long accountId);
+    ConfigKey<Integer> AutoScaleStatsInterval = new ConfigKey<>(ConfigKey.CATEGORY_ADVANCED, Integer.class,
+            "autoscale.stats.interval",
+            "60",
+            "The interval (in seconds) when VM auto scaling statistics are processed to determine and perform scale action. Less than 1 means disabled.",
+            false);
+
+    ConfigKey<Integer> AutoScaleStatsCleanupDelay = new ConfigKey<>(ConfigKey.CATEGORY_ADVANCED, Integer.class,
+            "autoscale.stats.cleanup.delay",
+            "7200",
+            "Determines how long (in seconds) to wait before actually removing auto scaling statistics from database. The default value is 7200 (2 hours).",
+            false);
+
+    ConfigKey<Integer> AutoScaleStatsWorker = new ConfigKey<>(ConfigKey.CATEGORY_ADVANCED, Integer.class,
+            "autoscale.stats.worker",
+            "10",
+            "The Number of worker threads to scan the autoscale vm groups.",
+            false);
+
+    void checkAutoScaleUser(Long autoscaleUserId, long accountId);
+
+    boolean deleteAutoScaleVmGroupsByAccount(Account account);
+
+    void cleanUpAutoScaleResources(Account account);
 
     void doScaleUp(long groupId, Integer numVm);
 
     void doScaleDown(long groupId);
+
+    void checkAllAutoScaleVmGroups();
+
+    void checkAutoScaleVmGroup(AutoScaleVmGroupVO asGroup);
+
+    void checkIfVmActionAllowed(Long vmId);
+
+    void removeVmFromVmGroup(Long vmId);
+
+    String getNextVmHostName(AutoScaleVmGroupVO asGroup);
+
+    void checkAutoScaleVmGroupName(String groupName);
 }

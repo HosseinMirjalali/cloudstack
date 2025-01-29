@@ -63,6 +63,10 @@ public class LoadBalancingRule {
         return lb.getId();
     }
 
+    public LoadBalancer getLb() {
+        return lb;
+    }
+
     public String getName() {
         return lb.getName();
     }
@@ -406,9 +410,9 @@ public class LoadBalancingRule {
         AutoScaleVmGroup vmGroup;
         private final List<LbAutoScalePolicy> policies;
         private final LbAutoScaleVmProfile profile;
-        private final String currentState;
+        private final AutoScaleVmGroup.State currentState;
 
-        public LbAutoScaleVmGroup(AutoScaleVmGroup vmGroup, List<LbAutoScalePolicy> policies, LbAutoScaleVmProfile profile, String currentState) {
+        public LbAutoScaleVmGroup(AutoScaleVmGroup vmGroup, List<LbAutoScalePolicy> policies, LbAutoScaleVmProfile profile, AutoScaleVmGroup.State currentState) {
             this.vmGroup = vmGroup;
             this.policies = policies;
             this.profile = profile;
@@ -427,7 +431,7 @@ public class LoadBalancingRule {
             return profile;
         }
 
-        public String getCurrentState() {
+        public AutoScaleVmGroup.State getCurrentState() {
             return currentState;
         }
     }
@@ -481,5 +485,9 @@ public class LoadBalancingRule {
 
     public Scheme getScheme() {
         return lb.getScheme();
+    }
+
+    public String getCidrList(){
+        return lb.getCidrList();
     }
 }

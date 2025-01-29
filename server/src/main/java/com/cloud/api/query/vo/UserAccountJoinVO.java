@@ -130,6 +130,12 @@ public class UserAccountJoinVO extends BaseViewVO implements InternalIdentity, I
     @Enumerated(value = EnumType.STRING)
     private User.Source source;
 
+    @Column(name = "is_user_2fa_enabled")
+    boolean user2faEnabled;
+
+    @Column(name = "api_key_access")
+    Boolean apiKeyAccess;
+
     public UserAccountJoinVO() {
     }
 
@@ -273,5 +279,13 @@ public class UserAccountJoinVO extends BaseViewVO implements InternalIdentity, I
 
     public User.Source getSource() {
         return source;
+    }
+
+    public boolean isUser2faEnabled() {
+        return user2faEnabled;
+    }
+
+    public Boolean getApiKeyAccess() {
+        return apiKeyAccess;
     }
 }

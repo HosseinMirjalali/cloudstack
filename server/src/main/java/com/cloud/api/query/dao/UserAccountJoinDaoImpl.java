@@ -19,7 +19,8 @@ package com.cloud.api.query.dao;
 import java.util.List;
 
 
-import org.apache.log4j.Logger;
+import com.cloud.user.AccountManagerImpl;
+import org.apache.cloudstack.api.ResponseObject.ResponseView;
 import org.springframework.stereotype.Component;
 
 import org.apache.cloudstack.api.response.UserResponse;
@@ -33,7 +34,6 @@ import com.cloud.utils.db.SearchCriteria;
 
 @Component
 public class UserAccountJoinDaoImpl extends GenericDaoBase<UserAccountJoinVO, Long> implements UserAccountJoinDao {
-    public static final Logger s_logger = Logger.getLogger(UserAccountJoinDaoImpl.class);
 
     private SearchBuilder<UserAccountJoinVO> vrIdSearch;
 
@@ -53,7 +53,7 @@ public class UserAccountJoinDaoImpl extends GenericDaoBase<UserAccountJoinVO, Lo
     }
 
     @Override
-    public UserResponse newUserResponse(UserAccountJoinVO usr) {
+    public UserResponse newUserResponse(ResponseView view, UserAccountJoinVO usr) {
         UserResponse userResponse = new UserResponse();
         userResponse.setAccountId(usr.getAccountUuid());
         userResponse.setAccountName(usr.getAccountName());
@@ -72,6 +72,13 @@ public class UserAccountJoinDaoImpl extends GenericDaoBase<UserAccountJoinVO, Lo
         userResponse.setApiKey(usr.getApiKey());
         userResponse.setSecretKey(usr.getSecretKey());
         userResponse.setIsDefault(usr.isDefault());
+        userResponse.set2FAenabled(usr.isUser2faEnabled());
+        long domainId = usr.getDomainId();
+        boolean is2FAmandated = Boolean.TRUE.equals(AccountManagerImpl.enableUserTwoFactorAuthentication.valueIn(domainId)) && Boolean.TRUE.equals(AccountManagerImpl.mandateUserTwoFactorAuthentication.valueIn(domainId));
+        userResponse.set2FAmandated(is2FAmandated);
+        if (view == ResponseView.Full) {
+            userResponse.setApiKeyAccess(usr.getApiKeyAccess());
+        }
 
         // set async job
         if (usr.getJobId() != null) {

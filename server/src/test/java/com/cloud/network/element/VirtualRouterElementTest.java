@@ -16,32 +16,6 @@
 // under the License.
 package com.cloud.network.element;
 
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.cloudstack.engine.orchestration.service.NetworkOrchestrationService;
-import org.apache.cloudstack.framework.config.dao.ConfigurationDao;
-import org.apache.cloudstack.network.router.deployment.RouterDeploymentDefinitionBuilder;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Matchers;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
-
 import com.cloud.cluster.dao.ManagementServerHostDao;
 import com.cloud.configuration.ConfigurationManager;
 import com.cloud.dc.DataCenter;
@@ -65,6 +39,8 @@ import com.cloud.network.NetworkModel;
 import com.cloud.network.NetworkModelImpl;
 import com.cloud.network.Networks.TrafficType;
 import com.cloud.network.VirtualRouterProvider.Type;
+import com.cloud.network.as.AutoScaleCounter;
+import com.cloud.network.as.AutoScaleCounter.AutoScaleCounterType;
 import com.cloud.network.dao.FirewallRulesDao;
 import com.cloud.network.dao.IPAddressDao;
 import com.cloud.network.dao.LoadBalancerDao;
@@ -89,6 +65,7 @@ import com.cloud.network.router.VirtualRouter;
 import com.cloud.network.router.VirtualRouter.RedundantState;
 import com.cloud.network.router.VpcVirtualNetworkApplianceManagerImpl;
 import com.cloud.network.rules.dao.PortForwardingRulesDao;
+import com.cloud.network.vpc.VpcVO;
 import com.cloud.offering.NetworkOffering;
 import com.cloud.offerings.NetworkOfferingVO;
 import com.cloud.offerings.dao.NetworkOfferingDao;
@@ -120,6 +97,39 @@ import com.cloud.vm.dao.NicIpAliasDao;
 import com.cloud.vm.dao.UserVmDao;
 import com.cloud.vm.dao.UserVmDetailsDao;
 import com.cloud.vm.dao.VMInstanceDao;
+import org.apache.cloudstack.engine.orchestration.service.NetworkOrchestrationService;
+import org.apache.cloudstack.framework.config.dao.ConfigurationDao;
+import org.apache.cloudstack.network.BgpPeerVO;
+import org.apache.cloudstack.network.router.deployment.RouterDeploymentDefinitionBuilder;
+import org.apache.cloudstack.network.topology.NetworkTopology;
+import org.apache.cloudstack.network.topology.NetworkTopologyContext;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VirtualRouterElementTest {
@@ -175,6 +185,7 @@ public class VirtualRouterElementTest {
     @Mock private ResourceManager _resourceMgr;
     @Mock private UserVmManager _userVmMgr;
     @Mock private VirtualMachineManager _itMgr;
+    @Mock private NetworkTopologyContext networkTopologyContext;
 
     @InjectMocks
     private RouterDeploymentDefinitionBuilder routerDeploymentDefinitionBuilder;
@@ -249,7 +260,7 @@ public class VirtualRouterElementTest {
     public void testGetRouters2(){
         Network networkUpdateInprogress=new NetworkVO(2l,null,null,null,1l,1l,1l,1l,"d","d","d",null,1l,1l,null,true,null,true);
         mockDAOs((NetworkVO)networkUpdateInprogress,testOffering);
-        //alwyas return backup routers first when both primary and backup need update.
+        //always return backup routers first when both primary and backup need update.
         List<DomainRouterVO> routers=virtualRouterElement.getRouters(networkUpdateInprogress);
         assertTrue(routers.size()==1);
         assertTrue(routers.get(0).getRedundantState()==RedundantState.BACKUP && routers.get(0).getUpdateState()==VirtualRouter.UpdateState.UPDATE_IN_PROGRESS);
@@ -259,7 +270,7 @@ public class VirtualRouterElementTest {
     public void testGetRouters3(){
         Network network=new NetworkVO(3l,null,null,null,1l,1l,1l,1l,"d","d","d",null,1l,1l,null,true,null,true);
         mockDAOs((NetworkVO)network,testOffering);
-        //alwyas return backup routers first when both primary and backup need update.
+        //always return backup routers first when both primary and backup need update.
         List<DomainRouterVO> routers=virtualRouterElement.getRouters(network);
         assertTrue(routers.size()==4);
     }
@@ -339,7 +350,7 @@ public class VirtualRouterElementTest {
                 VirtualMachine.Type.DomainRouter,
                 /* defaultUse */ false);
         lenient().when(_serviceOfferingDao.findById(0L)).thenReturn(svcoff);
-        lenient().when(_serviceOfferingDao.findByName(Matchers.anyString())).thenReturn(svcoff);
+        lenient().when(_serviceOfferingDao.findByName(ArgumentMatchers.anyString())).thenReturn(svcoff);
         final DomainRouterVO router = new DomainRouterVO(/* id */ 1L,
                 /* serviceOfferingId */ 1L,
                 /* elementId */ 0L,
@@ -500,5 +511,66 @@ public class VirtualRouterElementTest {
         when(virtualRouterElement.canHandle(network, service)).thenReturn(false);
 
         assertTrue(virtualRouterElement.addPasswordAndUserdata(network, nic, vm, dest, context));
+    }
+
+    @Test
+    public void verifyAutoScaleCounters() {
+        final List<AutoScaleCounter> counterList = VirtualRouterElement.getAutoScaleCounters();
+        assertEquals(3, counterList.size());
+
+        List<String> counterNames = counterList.stream().map(counter -> counter.getName()).collect(Collectors.toList());
+
+        assertEquals(3, counterNames.size());
+        assertTrue(counterNames.contains(AutoScaleCounterType.Cpu.getName()));
+        assertTrue(counterNames.contains(AutoScaleCounterType.Memory.getName()));
+        assertTrue(counterNames.contains(AutoScaleCounterType.VirtualRouter.getName()));
+    }
+
+    @Test
+    public void testApplyBgpPeersForVpc() throws ResourceUnavailableException {
+        List<BgpPeerVO> bgpPeers = Mockito.mock(List.class);
+        VpcVO vpc = Mockito.mock(VpcVO.class);
+
+        DomainRouterVO router = Mockito.mock(DomainRouterVO.class);
+        when(router.getState()).thenReturn(VirtualMachine.State.Running);
+        long zoneId = 10L;
+        long vpcId = 11L;
+        when(vpc.getId()).thenReturn(vpcId);
+        when(vpc.getZoneId()).thenReturn(zoneId);
+        when(_routerDao.listByVpcId(vpcId)).thenReturn(Arrays.asList(router));
+        DataCenterVO dc = Mockito.mock(DataCenterVO.class);
+        when(_dcDao.findById(zoneId)).thenReturn(dc);
+        NetworkTopology networkTopology = Mockito.mock(NetworkTopology.class);
+        when(networkTopologyContext.retrieveNetworkTopology(dc)).thenReturn(networkTopology);
+        doReturn(true).when(networkTopology).applyBgpPeers(any(), any(), any());
+
+        boolean result = virtualRouterElement.applyBgpPeers(vpc, null, bgpPeers);
+
+        Assert.assertTrue(result);
+        verify(networkTopology).applyBgpPeers(any(), any(), any());
+    }
+
+    @Test
+    public void testApplyBgpPeersForNetwork() throws ResourceUnavailableException {
+        List<BgpPeerVO> bgpPeers = Mockito.mock(List.class);
+        NetworkVO network = Mockito.mock(NetworkVO.class);
+
+        DomainRouterVO router = Mockito.mock(DomainRouterVO.class);
+        when(router.getState()).thenReturn(VirtualMachine.State.Running);
+        long zoneId = 10L;
+        long networkId = 11L;
+        when(network.getId()).thenReturn(networkId);
+        when(network.getDataCenterId()).thenReturn(zoneId);
+        when(_routerDao.listByNetworkAndRole(networkId, VirtualRouter.Role.VIRTUAL_ROUTER)).thenReturn(Arrays.asList(router));
+        DataCenterVO dc = Mockito.mock(DataCenterVO.class);
+        when(_dcDao.findById(zoneId)).thenReturn(dc);
+        NetworkTopology networkTopology = Mockito.mock(NetworkTopology.class);
+        when(networkTopologyContext.retrieveNetworkTopology(dc)).thenReturn(networkTopology);
+        doReturn(true).when(networkTopology).applyBgpPeers(any(), any(), any());
+
+        boolean result = virtualRouterElement.applyBgpPeers(null, network, bgpPeers);
+
+        Assert.assertTrue(result);
+        verify(networkTopology).applyBgpPeers(any(), any(), any());
     }
 }
