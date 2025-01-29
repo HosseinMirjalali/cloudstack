@@ -176,6 +176,9 @@ public class DomainResponse extends BaseResponseWithAnnotations implements Resou
     @SerializedName("secondarystorageavailable") @Param(description="the total secondary storage space (in GiB) available to be used for this domain", since="4.2.0")
     private String secondaryStorageAvailable;
 
+    @SerializedName("guestnetworklimit") @Param(description="the total guest networks the domain can own", since="4.17.0")
+    private String guestNetworkLimit;
+
     @SerializedName(ApiConstants.RESOURCE_ICON)
     @Param(description = "Base64 string representation of the resource icon", since = "4.16.0.0")
     ResourceIconResponse icon;
@@ -398,6 +401,11 @@ public class DomainResponse extends BaseResponseWithAnnotations implements Resou
     @Override
     public void setPrimaryStorageLimit(String primaryStorageLimit) {
         this.primaryStorageLimit = primaryStorageLimit;
+    }
+
+    @Override
+    public void setGuestnetworkLimit(String guestnetworkLimit) {
+        this.guestNetworkLimit = guestnetworkLimit;
     }
 
     @Override

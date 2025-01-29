@@ -216,6 +216,10 @@ public class ProjectResponse extends BaseResponse implements ResourceLimitAndCou
     @Param(description = "the date this project was created", since = "4.16.0")
     private Date created;
 
+    @SerializedName("guestnetworklimit")
+    @Param(description = "the total guest networks the project can own", since = "4.17.0")
+    private String guestnetworkLimit;
+
     public void setId(String id) {
         this.id = id;
     }
@@ -404,6 +408,11 @@ public class ProjectResponse extends BaseResponse implements ResourceLimitAndCou
     @Override
     public void setPrimaryStorageLimit(String primaryStorageLimit) {
         this.primaryStorageLimit = primaryStorageLimit;
+    }
+
+    @Override
+    public void setGuestnetworkLimit(String guestnetworkLimit) {
+        this.guestnetworkLimit = guestnetworkLimit;
     }
 
     @Override
