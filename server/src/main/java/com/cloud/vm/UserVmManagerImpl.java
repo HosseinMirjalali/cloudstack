@@ -1363,6 +1363,25 @@ public class UserVmManagerImpl extends ManagerBase implements UserVmManager, Vir
                 throw new CloudRuntimeException("Network " + network.getName() + " already has a vm with host name: " + vmInstance.getHostName());
             }
         }
+        List<NicVO> nics = _nicDao.listByVmId(vmInstance.getId());
+        s_logger.info(nics.toString());
+        List<Long> networkIdList = new ArrayList<>();
+        int guestNetworksUsed = 0;
+        for (NicVO nic : nics) {
+            networkIdList.add(nic.getNetworkId());
+        }
+        s_logger.info(networkIdList.toString());
+        for (Long networkIdFromNics: networkIdList) {
+            NetworkVO networkFromNic = _networkDao.findById(networkIdFromNics);
+            s_logger.info("network id:" + networkFromNic.getId() + " with type: " + networkFromNic.getGuestType());
+            if (networkFromNic.getGuestType() == Network.GuestType.Shared) {
+                guestNetworksUsed++;
+            }
+        }
+        s_logger.info("Guest networks used: " + guestNetworksUsed);
+        if (guestNetworksUsed == 3) {
+            throw new CloudRuntimeException("Maximum number of guest networks for account: " + vmOwner.getAccountName());
+        }
 
         NicProfile guestNic = null;
         boolean cleanUp = true;
