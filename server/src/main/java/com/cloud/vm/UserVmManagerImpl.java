@@ -1379,7 +1379,7 @@ public class UserVmManagerImpl extends ManagerBase implements UserVmManager, Vir
             }
         }
         s_logger.info("Guest networks used: " + guestNetworksUsed);
-        if (guestNetworksUsed == 3) {
+        if (guestNetworksUsed == 3 && network.getGuestType() == Network.GuestType.Shared) {
             throw new CloudRuntimeException("Maximum number of guest networks for account: " + vmOwner.getAccountName());
         }
 
