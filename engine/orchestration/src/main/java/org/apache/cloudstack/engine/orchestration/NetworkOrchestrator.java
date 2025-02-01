@@ -820,6 +820,22 @@ public class NetworkOrchestrator extends ManagerBase implements NetworkOrchestra
                     deviceId++;
                 }
 
+                List<Long> networkIdList = new ArrayList<>();
+                int guestNetworksUsed = 0;
+                for (NicProfile nic: nics) {
+                    networkIdList.add(nic.getNetworkId());
+                }
+                for (Long networkId: networkIdList) {
+                    NetworkVO networkFromNic = _networksDao.findById(networkId);
+                    if (networkFromNic.getGuestType() == Network.GuestType.Shared) {
+                        guestNetworksUsed++;
+                    }
+                }
+                s_logger.info("Guest networks used: " + guestNetworksUsed);
+                if (guestNetworksUsed > 3) {
+                    throw new CloudRuntimeException("Maximum number of guest networks for account: " + vm.getOwner().getAccountName());
+                }
+
                 final Pair<NicProfile, Integer> vmNicPair = allocateNic(requested, nextNetwork, isDefaultNic, deviceId, vm);
                 NicProfile vmNic = null;
                 if (vmNicPair != null) {
@@ -922,6 +938,7 @@ public class NetworkOrchestrator extends ManagerBase implements NetworkOrchestra
              * @throws InsufficientAddressCapacityException also magnificent, as the name sugests
              */
             private void createExtraNics(int size, List<NicProfile> nics, Network finalNetwork) throws InsufficientVirtualNetworkCapacityException, InsufficientAddressCapacityException {
+
                 if (nics.size() != size) {
                     s_logger.warn("Number of nics " + nics.size() + " doesn't match number of requested nics " + size);
                     if (nics.size() > size) {
