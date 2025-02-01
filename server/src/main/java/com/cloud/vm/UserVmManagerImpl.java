@@ -1366,11 +1366,12 @@ public class UserVmManagerImpl extends ManagerBase implements UserVmManager, Vir
         List<NicVO> totalNics = _nicDao.listByVmId(vmInstance.getId());
         List<Long> networkIdList = new ArrayList<>();
         List<UserVmVO> userVMs = _vmDao.listByAccountId(vmInstance.getAccountId());
+//        s_logger.info("User: " + vmOwner.getAccountName() + " has " + userVMs.size() + " VMs");
         for (UserVmVO userVM : userVMs) {
             List<NicVO> nics = _nicDao.listByVmId(userVM.getId());
             totalNics.addAll(nics);
         }
-        s_logger.info(totalNics.toString());
+//        s_logger.info("User: " + vmOwner.getAccountName() + " has " + totalNics.toString() + " NICs");
         int guestNetworksUsed = 0;
         for (NicVO nic : totalNics) {
             networkIdList.add(nic.getNetworkId());
@@ -1382,12 +1383,12 @@ public class UserVmManagerImpl extends ManagerBase implements UserVmManager, Vir
         s_logger.info(networkIdList.toString());
         for (Long networkIdFromNics: networkIdList) {
             NetworkVO networkFromNic = _networkDao.findById(networkIdFromNics);
-            s_logger.info("network id:" + networkFromNic.getId() + " with type: " + networkFromNic.getGuestType());
+//            s_logger.info("network id:" + networkFromNic.getId() + " with type: " + networkFromNic.getGuestType());
             if (networkFromNic.getGuestType() == Network.GuestType.Shared) {
                 guestNetworksUsed++;
             }
         }
-        s_logger.info("Guest networks used: " + guestNetworksUsed);
+//        s_logger.info("Guest networks used: " + guestNetworksUsed);
         if (guestNetworksUsed >= 3 && network.getGuestType() == Network.GuestType.Shared) {
             throw new CloudRuntimeException("Maximum number of guest networks for account: " + vmOwner.getAccountName());
         }
