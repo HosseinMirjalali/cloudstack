@@ -802,13 +802,13 @@ public class NetworkOrchestrator extends ManagerBase implements NetworkOrchestra
                     if (n.getGuestType() == GuestType.Shared) {
                         guestNetworksUsed++;
                         addingSharedGuestNetwork = true;
-                        s_logger.info("Adding " + n.getName() + " to guest networks, current count is: " + guestNetworksUsed);
+//                        s_logger.info("Adding " + n.getName() + " to guest networks, current count is: " + guestNetworksUsed);
                     }
-                    s_logger.info("network " + n.getName() + " is of type: " + n.getGuestType());
+//                    s_logger.info("network " + n.getName() + " is of type: " + n.getGuestType());
                 }
                 if (addingSharedGuestNetwork) {
                     List<VMInstanceVO> userVMs = _vmDao.listByAccountId(vm.getOwner().getAccountId());
-                    s_logger.info("User: " + vm.getOwner().getAccountName() + " has " + userVMs.size() + " VMs");
+//                    s_logger.info("User: " + vm.getOwner().getAccountName() + " has " + userVMs.size() + " VMs");
                     for (VMInstanceVO userVM : userVMs) {
                         List<NicVO> userNics = _nicDao.listByVmId(userVM.getId());
                         totalNics.addAll(userNics);
@@ -818,7 +818,7 @@ public class NetworkOrchestrator extends ManagerBase implements NetworkOrchestra
                     }
                     for (Long networkIdFromNics: networkIdList) {
                         NetworkVO networkFromNic = _networksDao.findById(networkIdFromNics);
-                        s_logger.info("network id:" + networkFromNic.getId() + " with type: " + networkFromNic.getGuestType());
+//                        s_logger.info("network id:" + networkFromNic.getId() + " with type: " + networkFromNic.getGuestType());
                         if (networkFromNic.getGuestType() == Network.GuestType.Shared) {
                             guestNetworksUsed++;
                         }

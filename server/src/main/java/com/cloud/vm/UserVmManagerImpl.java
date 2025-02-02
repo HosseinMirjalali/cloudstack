@@ -1374,18 +1374,10 @@ public class UserVmManagerImpl extends ManagerBase implements UserVmManager, Vir
 //        s_logger.info("User: " + vmOwner.getAccountName() + " has " + totalNics.toString() + " NICs");
         int guestNetworksUsed = 0;
         for (NicVO nic : totalNics) {
-            networkIdList.add(nic.getNetworkId());
-        }
-        // remove duplicates
-        Set<Long> set = new HashSet<>(networkIdList);
-        networkIdList.clear();
-        networkIdList.addAll(set);
-        s_logger.info(networkIdList.toString());
-        for (Long networkIdFromNics: networkIdList) {
-            NetworkVO networkFromNic = _networkDao.findById(networkIdFromNics);
-//            s_logger.info("network id:" + networkFromNic.getId() + " with type: " + networkFromNic.getGuestType());
+            NetworkVO networkFromNic = _networkDao.findById(nic.getNetworkId());
             if (networkFromNic.getGuestType() == Network.GuestType.Shared) {
                 guestNetworksUsed++;
+//                s_logger.info("adding Shared guest network from instance: " + nic.getInstanceId() + " to total. guest networks: " + guestNetworksUsed);
             }
         }
 //        s_logger.info("Guest networks used: " + guestNetworksUsed);
