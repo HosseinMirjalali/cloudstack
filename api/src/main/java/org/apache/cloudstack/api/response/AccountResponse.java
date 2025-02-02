@@ -215,6 +215,10 @@ public class AccountResponse extends BaseResponse implements ResourceLimitAndCou
     @Param(description = "the total primary storage space (in GiB) owned by account", since = "4.2.0")
     private Long primaryStorageTotal;
 
+    @SerializedName("sharedguestnetworktotal")
+    @Param(description = "the total shared guest network owned by account", since = "4.17.2.0")
+    private Long sharedGuestNetworkTotal;
+
     @SerializedName("primarystorageavailable")
     @Param(description = "the total primary storage space (in GiB) available to be used for this account", since = "4.2.0")
     private String primaryStorageAvailable;
@@ -507,6 +511,11 @@ public class AccountResponse extends BaseResponse implements ResourceLimitAndCou
     @Override
     public void setPrimaryStorageTotal(Long primaryStorageTotal) {
         this.primaryStorageTotal = primaryStorageTotal;
+    }
+
+    @Override
+    public void setSharedGuestNetworkTotal(Long sharedGuestNetworkTotal) {
+        this.sharedGuestNetworkTotal = sharedGuestNetworkTotal;
     }
 
     @Override

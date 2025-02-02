@@ -32,7 +32,8 @@ public interface Resource {
         cpu("cpu", 8, ResourceOwnerType.Account, ResourceOwnerType.Domain),
         memory("memory", 9, ResourceOwnerType.Account, ResourceOwnerType.Domain),
         primary_storage("primary_storage", 10, ResourceOwnerType.Account, ResourceOwnerType.Domain),
-        secondary_storage("secondary_storage", 11, ResourceOwnerType.Account, ResourceOwnerType.Domain);
+        secondary_storage("secondary_storage", 11, ResourceOwnerType.Account, ResourceOwnerType.Domain),
+        shared_guest_network("shared_guest_network", 11, ResourceOwnerType.Account, ResourceOwnerType.Domain);
 
         private String name;
         private ResourceOwnerType[] supportedOwners;

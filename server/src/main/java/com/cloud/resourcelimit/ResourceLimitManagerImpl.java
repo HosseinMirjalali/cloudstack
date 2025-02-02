@@ -29,6 +29,12 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.naming.ConfigurationException;
 
+import com.cloud.network.Network;
+import com.cloud.network.dao.NetworkVO;
+import com.cloud.vm.NicVO;
+import com.cloud.vm.UserVmVO;
+import com.cloud.vm.VMInstanceVO;
+import com.cloud.vm.dao.NicDao;
 import org.apache.cloudstack.acl.SecurityChecker.AccessType;
 import org.apache.cloudstack.context.CallContext;
 import org.apache.cloudstack.engine.subsystem.api.storage.ObjectInDataStoreStateMachine;
@@ -148,6 +154,8 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
     @Inject
     private NetworkDao _networkDao;
     @Inject
+    private NicDao _nicDao;
+    @Inject
     private VpcDao _vpcDao;
     @Inject
     private ServiceOfferingDao _serviceOfferingDao;
@@ -238,6 +246,7 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
             accountResourceLimitMap.put(Resource.ResourceType.cpu, Long.parseLong(_configDao.getValue(Config.DefaultMaxAccountCpus.key())));
             accountResourceLimitMap.put(Resource.ResourceType.memory, Long.parseLong(_configDao.getValue(Config.DefaultMaxAccountMemory.key())));
             accountResourceLimitMap.put(Resource.ResourceType.primary_storage, Long.parseLong(_configDao.getValue(Config.DefaultMaxAccountPrimaryStorage.key())));
+            accountResourceLimitMap.put(Resource.ResourceType.shared_guest_network, Long.parseLong(_configDao.getValue(Config.DefaultMaxAccountSharedGuestNetworks.key())));
             accountResourceLimitMap.put(Resource.ResourceType.secondary_storage, MaxAccountSecondaryStorage.value());
 
             domainResourceLimitMap.put(Resource.ResourceType.public_ip, Long.parseLong(_configDao.getValue(Config.DefaultMaxDomainPublicIPs.key())));
@@ -920,6 +929,8 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
             newCount = _volumeDao.primaryStorageUsedForAccount(accountId, virtualRouters);
         } else if (type == Resource.ResourceType.secondary_storage) {
             newCount = calculateSecondaryStorageForAccount(accountId);
+        } else if (type == ResourceType.shared_guest_network) {
+            newCount = countSharedGuestNetworksForAccount(accountId);
         } else {
             throw new InvalidParameterValueException("Unsupported resource type " + type);
         }
@@ -1039,6 +1050,29 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
         } else {
             return allocatedCount;
         }
+    }
+
+    public long countSharedGuestNetworksForAccount(long accountId) {
+        List<VMInstanceVO> userVMs = _vmDao.listByAccountId(accountId);
+        List<NicVO> totalNics = new ArrayList<>(List.of());
+        if (s_logger.isDebugEnabled()) {
+            s_logger.debug("Account: " + accountId + " has " + userVMs.size() + " VMs");
+        }
+        for (VMInstanceVO userVM : userVMs) {
+            List<NicVO> nics = _nicDao.listByVmId(userVM.getId());
+            totalNics.addAll(nics);
+        }
+        int guestNetworksUsed = 0;
+        for (NicVO nic : totalNics) {
+            NetworkVO networkFromNic = _networkDao.findById(nic.getNetworkId());
+            if (networkFromNic.getGuestType() == Network.GuestType.Shared) {
+                guestNetworksUsed++;
+            }
+        }
+        if (s_logger.isDebugEnabled()) {
+            s_logger.debug("Account: " + accountId + " has " + guestNetworksUsed + "shared guest networks.");
+        }
+        return guestNetworksUsed;
     }
 
     @Override

@@ -1305,6 +1305,14 @@ public enum Config {
             "20",
             "The default maximum number of templates that can be deployed for an account",
             null),
+    DefaultMaxAccountSharedGuestNetworks(
+            "Account Defaults",
+            ManagementServer.class,
+            Long.class,
+            "max.account.shared.guest.networks",
+            "3",
+            "The default maximum number of shared guest networks that can be consumed by an account",
+            null),
     DefaultMaxAccountSnapshots(
             "Account Defaults",
             ManagementServer.class,

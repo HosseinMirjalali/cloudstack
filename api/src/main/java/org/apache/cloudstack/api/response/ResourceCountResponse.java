@@ -47,11 +47,11 @@ public class ResourceCountResponse extends BaseResponse implements ControlledEnt
     private String domainName;
 
     @SerializedName(ApiConstants.RESOURCE_TYPE)
-    @Param(description = "resource type. Values include 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11. See the resourceType parameter for more information on these values.")
+    @Param(description = "resource type. Values include 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12. See the resourceType parameter for more information on these values.")
     private String resourceType;
 
     @SerializedName(ApiConstants.RESOURCE_TYPE_NAME)
-    @Param(description = "resource type name. Values include user_vm, public_ip, volume, snapshot, template, project, network, vpc, cpu, memory, primary_storage, secondary_storage.")
+    @Param(description = "resource type name. Values include user_vm, public_ip, volume, snapshot, template, project, network, vpc, cpu, memory, primary_storage, secondary_storage, shared_guest_network.")
     private String resourceTypeName;
 
     @SerializedName("resourcecount")
