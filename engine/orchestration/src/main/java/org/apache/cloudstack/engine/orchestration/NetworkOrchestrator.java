@@ -795,20 +795,28 @@ public class NetworkOrchestrator extends ManagerBase implements NetworkOrchestra
                 List<Long> networkIdList = new ArrayList<>();
                 int guestNetworksUsed = 0;
                 boolean addingSharedGuestNetwork = false;
-                s_logger.info("network size of the VM is: " + networks.size());
+                if (s_logger.isDebugEnabled()) {
+                    s_logger.debug("network size of the VM is: " + networks.size());
+                }
                 List<NicVO> totalNics = new ArrayList<>(List.of());
                 for (Pair<Network, NicProfile> networkNicPair : profilesList) {
                     Network n = networkNicPair.first();
                     if (n.getGuestType() == GuestType.Shared) {
                         guestNetworksUsed++;
                         addingSharedGuestNetwork = true;
-//                        s_logger.info("Adding " + n.getName() + " to guest networks, current count is: " + guestNetworksUsed);
+                        if (s_logger.isDebugEnabled()) {
+                            s_logger.debug("Adding " + n.getName() + " to guest networks, current count is: " + guestNetworksUsed);
+                        }
                     }
-//                    s_logger.info("network " + n.getName() + " is of type: " + n.getGuestType());
+                        if (s_logger.isDebugEnabled()) {
+                            s_logger.debug("network " + n.getName() + " is of type: " + n.getGuestType());
+                        }
                 }
                 if (addingSharedGuestNetwork) {
                     List<VMInstanceVO> userVMs = _vmDao.listByAccountId(vm.getOwner().getAccountId());
-//                    s_logger.info("User: " + vm.getOwner().getAccountName() + " has " + userVMs.size() + " VMs");
+                    if (s_logger.isDebugEnabled()) {
+                        s_logger.debug("User: " + vm.getOwner().getAccountName() + " has " + userVMs.size() + " VMs");
+                    }
                     for (VMInstanceVO userVM : userVMs) {
                         List<NicVO> userNics = _nicDao.listByVmId(userVM.getId());
                         totalNics.addAll(userNics);
@@ -818,12 +826,16 @@ public class NetworkOrchestrator extends ManagerBase implements NetworkOrchestra
                     }
                     for (Long networkIdFromNics: networkIdList) {
                         NetworkVO networkFromNic = _networksDao.findById(networkIdFromNics);
-//                        s_logger.info("network id:" + networkFromNic.getId() + " with type: " + networkFromNic.getGuestType());
+                        if (s_logger.isDebugEnabled()) {
+                            s_logger.debug("network id:" + networkFromNic.getId() + " with type: " + networkFromNic.getGuestType());
+                        }
                         if (networkFromNic.getGuestType() == Network.GuestType.Shared) {
                             guestNetworksUsed++;
                         }
                     }
-                    s_logger.info("Total guest networks: " + guestNetworksUsed);
+                    if (s_logger.isDebugEnabled()) {
+                        s_logger.debug("Total guest networks: " + guestNetworksUsed);
+                    }
                     if (guestNetworksUsed > 3) {
                         throw new CloudRuntimeException("Maximum number of guest networks for account: " + vm.getOwner().getAccountName());
                     }

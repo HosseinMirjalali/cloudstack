@@ -1366,21 +1366,29 @@ public class UserVmManagerImpl extends ManagerBase implements UserVmManager, Vir
         List<NicVO> totalNics = _nicDao.listByVmId(vmInstance.getId());
         List<Long> networkIdList = new ArrayList<>();
         List<UserVmVO> userVMs = _vmDao.listByAccountId(vmInstance.getAccountId());
-//        s_logger.info("User: " + vmOwner.getAccountName() + " has " + userVMs.size() + " VMs");
+        if (s_logger.isDebugEnabled()) {
+            s_logger.debug("User: " + vmOwner.getAccountName() + " has " + userVMs.size() + " VMs");
+        }
         for (UserVmVO userVM : userVMs) {
             List<NicVO> nics = _nicDao.listByVmId(userVM.getId());
             totalNics.addAll(nics);
         }
-//        s_logger.info("User: " + vmOwner.getAccountName() + " has " + totalNics.toString() + " NICs");
+        if (s_logger.isDebugEnabled()) {
+            s_logger.debug("User: " + vmOwner.getAccountName() + " has " + totalNics.toString() + " NICs");
+        }
         int guestNetworksUsed = 0;
         for (NicVO nic : totalNics) {
             NetworkVO networkFromNic = _networkDao.findById(nic.getNetworkId());
             if (networkFromNic.getGuestType() == Network.GuestType.Shared) {
                 guestNetworksUsed++;
-//                s_logger.info("adding Shared guest network from instance: " + nic.getInstanceId() + " to total. guest networks: " + guestNetworksUsed);
+                if (s_logger.isDebugEnabled()) {
+                    s_logger.debug("adding Shared guest network from instance: " + nic.getInstanceId() + " to total. guest networks: " + guestNetworksUsed);
+                }
             }
         }
-//        s_logger.info("Guest networks used: " + guestNetworksUsed);
+            if (s_logger.isDebugEnabled()) {
+                s_logger.debug("Guest networks used: " + guestNetworksUsed);
+            }
         if (guestNetworksUsed >= 3 && network.getGuestType() == Network.GuestType.Shared) {
             throw new CloudRuntimeException("Maximum number of guest networks for account: " + vmOwner.getAccountName());
         }
