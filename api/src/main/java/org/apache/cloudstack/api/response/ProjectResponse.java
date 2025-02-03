@@ -140,6 +140,10 @@ public class ProjectResponse extends BaseResponse implements ResourceLimitAndCou
     @Param(description = "the total secondary storage space (in GiB) available to be used for this project", since = "4.2.0")
     private String secondaryStorageAvailable;
 
+    @SerializedName("sharedguestnetworktotal")
+    @Param(description = "the total shared guest network owned by project", since = "4.17.0")
+    private Long sharedGuestNetworkTotal;
+
     @SerializedName(ApiConstants.VM_LIMIT)
     @Param(description = "the total number of virtual machines that can be deployed by this project", since = "4.2.0")
     private String vmLimit;
@@ -409,6 +413,11 @@ public class ProjectResponse extends BaseResponse implements ResourceLimitAndCou
     @Override
     public void setPrimaryStorageTotal(Long primaryStorageTotal) {
         this.primaryStorageTotal = primaryStorageTotal;
+    }
+
+    @Override
+    public void setSharedGuestNetworkTotal(Long sharedGuestNetworkTotal) {
+        this.sharedGuestNetworkTotal = sharedGuestNetworkTotal;
     }
 
     @Override

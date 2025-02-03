@@ -50,6 +50,8 @@ public interface ResourceLimitAndCountResponse {
 
     public void setPrimaryStorageTotal(Long primaryStorageTotal);
 
+    void setSharedGuestNetworkTotal(Long sharedGuestNetworkTotal);
+
     public void setPrimaryStorageAvailable(String primaryStorageAvailable);
 
     public void setSecondaryStorageLimit(String secondaryStorageLimit);

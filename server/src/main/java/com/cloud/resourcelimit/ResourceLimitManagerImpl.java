@@ -32,7 +32,6 @@ import javax.naming.ConfigurationException;
 import com.cloud.network.Network;
 import com.cloud.network.dao.NetworkVO;
 import com.cloud.vm.NicVO;
-import com.cloud.vm.UserVmVO;
 import com.cloud.vm.VMInstanceVO;
 import com.cloud.vm.dao.NicDao;
 import org.apache.cloudstack.acl.SecurityChecker.AccessType;
@@ -930,7 +929,7 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
         } else if (type == Resource.ResourceType.secondary_storage) {
             newCount = calculateSecondaryStorageForAccount(accountId);
         } else if (type == ResourceType.shared_guest_network) {
-            newCount = countSharedGuestNetworksForAccount(accountId);
+            newCount = _nicDao.countByAccountAndNetworkGuestType(accountId, Network.GuestType.Shared);
         } else {
             throw new InvalidParameterValueException("Unsupported resource type " + type);
         }

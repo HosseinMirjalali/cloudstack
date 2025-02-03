@@ -176,6 +176,9 @@ public class DomainResponse extends BaseResponseWithAnnotations implements Resou
     @SerializedName("secondarystorageavailable") @Param(description="the total secondary storage space (in GiB) available to be used for this domain", since="4.2.0")
     private String secondaryStorageAvailable;
 
+    @SerializedName("sharedguestnetworktotal") @Param(description="the total shared guest network owned by domain", since="4.2.0")
+    private Long sharedGuestNetworkTotal;
+
     @SerializedName(ApiConstants.RESOURCE_ICON)
     @Param(description = "Base64 string representation of the resource icon", since = "4.16.0.0")
     ResourceIconResponse icon;
@@ -403,6 +406,11 @@ public class DomainResponse extends BaseResponseWithAnnotations implements Resou
     @Override
     public void setPrimaryStorageTotal(Long primaryStorageTotal) {
         this.primaryStorageTotal = primaryStorageTotal;
+    }
+
+    @Override
+    public void setSharedGuestNetworkTotal(Long sharedGuestNetworkTotal) {
+        this.sharedGuestNetworkTotal = sharedGuestNetworkTotal;
     }
 
     @Override
