@@ -789,16 +789,15 @@ public class NetworkOrchestrator extends ManagerBase implements NetworkOrchestra
                 Arrays.fill(deviceIds, false);
 
                 List<Pair<Network, NicProfile>> profilesList = getOrderedNetworkNicProfileMapping(networks);
+
                 final List<NicProfile> nics = new ArrayList<NicProfile>(size);
                 NicProfile defaultNic = null;
                 Network nextNetwork = null;
-                List<Long> networkIdList = new ArrayList<>();
-                int guestNetworksUsed = 0;
+                long guestNetworksUsed = 0;
                 boolean addingSharedGuestNetwork = false;
                 if (s_logger.isDebugEnabled()) {
                     s_logger.debug("network size of the VM is: " + networks.size());
                 }
-                List<NicVO> totalNics = new ArrayList<>(List.of());
                 for (Pair<Network, NicProfile> networkNicPair : profilesList) {
                     Network n = networkNicPair.first();
                     if (n.getGuestType() == GuestType.Shared) {
@@ -813,29 +812,7 @@ public class NetworkOrchestrator extends ManagerBase implements NetworkOrchestra
                         }
                 }
                 if (addingSharedGuestNetwork) {
-                    List<VMInstanceVO> userVMs = _vmDao.listByAccountId(vm.getOwner().getAccountId());
-                    if (s_logger.isDebugEnabled()) {
-                        s_logger.debug("User: " + vm.getOwner().getAccountName() + " has " + userVMs.size() + " VMs");
-                    }
-                    for (VMInstanceVO userVM : userVMs) {
-                        List<NicVO> userNics = _nicDao.listByVmId(userVM.getId());
-                        totalNics.addAll(userNics);
-                    }
-                    for (NicVO nic : totalNics) {
-                        networkIdList.add(nic.getNetworkId());
-                    }
-                    for (Long networkIdFromNics: networkIdList) {
-                        NetworkVO networkFromNic = _networksDao.findById(networkIdFromNics);
-                        if (s_logger.isDebugEnabled()) {
-                            s_logger.debug("network id:" + networkFromNic.getId() + " with type: " + networkFromNic.getGuestType());
-                        }
-                        if (networkFromNic.getGuestType() == Network.GuestType.Shared) {
-                            guestNetworksUsed++;
-                        }
-                    }
-                    if (s_logger.isDebugEnabled()) {
-                        s_logger.debug("Total guest networks: " + guestNetworksUsed);
-                    }
+                    guestNetworksUsed += _nicDao.countByAccountAndNetworkGuestType(vm.getOwner().getAccountId(), GuestType.Shared);
                     if (guestNetworksUsed > 3) {
                         throw new CloudRuntimeException("Maximum number of guest networks for account: " + vm.getOwner().getAccountName());
                     }
