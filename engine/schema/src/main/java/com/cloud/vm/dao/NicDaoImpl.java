@@ -36,7 +36,6 @@ import com.cloud.utils.db.SearchCriteria;
 import com.cloud.utils.db.SearchCriteria.Func;
 import com.cloud.utils.db.SearchCriteria.Op;
 import com.cloud.vm.Nic;
-import com.cloud.vm.UserVmVO;
 import com.cloud.vm.Nic.State;
 import com.cloud.vm.NicVO;
 import com.cloud.vm.VMInstanceVO;
@@ -50,7 +49,7 @@ public class NicDaoImpl extends GenericDaoBase<NicVO, Long> implements NicDao {
     private GenericSearchBuilder<NicVO, Integer> deviceIdSearch;
     private GenericSearchBuilder<NicVO, Integer> CountByForStartingVms;
     private SearchBuilder<NicVO> PeerRouterSearch;
-    private GenericSearchBuilder<NicVO, Integer> CountByAccountAndGuestTypeSearch;
+    private SearchBuilder<NicVO> CountByAccountAndGuestTypeSearch;
 
     @Inject
     VMInstanceDao _vmDao;
@@ -115,31 +114,23 @@ public class NicDaoImpl extends GenericDaoBase<NicVO, Long> implements NicDao {
         PeerRouterSearch.and("vmType", PeerRouterSearch.entity().getVmType(), Op.EQ);
         PeerRouterSearch.done();
 
-        SearchBuilder<NicVO> CountByAccountAndGuestTypeSearch;
         CountByAccountAndGuestTypeSearch = createSearchBuilder();
         CountByAccountAndGuestTypeSearch.and("removed", CountByAccountAndGuestTypeSearch.entity().getRemoved(), Op.NULL);
         SearchBuilder<NetworkVO> networkSearch = _networkDao.createSearchBuilder();
         networkSearch.and("guestType", networkSearch.entity().getGuestType(), Op.EQ);
-        CountByAccountAndGuestTypeSearch.join("network", networkSearch,
-                networkSearch.entity().getId(),
-                CountByAccountAndGuestTypeSearch.entity().getNetworkId(),
-                JoinBuilder.JoinType.INNER);
-        SearchBuilder<UserVmVO> vmSearch = _userVmDao.createSearchBuilder();
-        vmSearch.and("accountId", vmSearch.entity().getAccountId(), Op.EQ);
-        CountByAccountAndGuestTypeSearch.join("vm", vmSearch,
-                vmSearch.entity().getId(),
-                CountByAccountAndGuestTypeSearch.entity().getInstanceId(),
-                JoinBuilder.JoinType.INNER);
+        CountByAccountAndGuestTypeSearch.join("network", networkSearch, networkSearch.entity().getId(), CountByAccountAndGuestTypeSearch.entity().getNetworkId(), JoinBuilder.JoinType.INNER);
+        SearchBuilder<VMInstanceVO> vmInstanceSearch = _vmDao.createSearchBuilder();
+        vmInstanceSearch.and("accountId", vmInstanceSearch.entity().getAccountId(), Op.EQ);
+        CountByAccountAndGuestTypeSearch.join("vmInstance", vmInstanceSearch, vmInstanceSearch.entity().getId(), CountByAccountAndGuestTypeSearch.entity().getInstanceId(), JoinBuilder.JoinType.INNER);
         CountByAccountAndGuestTypeSearch.done();
     }
 
     @Override
     public long countByAccountAndNetworkGuestType(long accountId, Network.GuestType guestType) {
-        SearchCriteria<Integer> sc = CountByAccountAndGuestTypeSearch.create();
+        SearchCriteria<NicVO> sc = CountByAccountAndGuestTypeSearch.create();
         sc.setJoinParameters("network", "guestType", guestType);
-        sc.setJoinParameters("vm", "accountId", accountId);
-        List<Integer> results = customSearch(sc, null);
-        return results.get(0);
+        sc.setJoinParameters("vmInstance", "accountId", accountId);
+        return listBy(sc).size();
     }
 
     @Override

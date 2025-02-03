@@ -51,6 +51,23 @@ import javax.naming.ConfigurationException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.cloud.exception.AffinityConflictException;
+import com.cloud.exception.AgentUnavailableException;
+import com.cloud.exception.CloudException;
+import com.cloud.exception.ConcurrentOperationException;
+import com.cloud.exception.InsufficientAddressCapacityException;
+import com.cloud.exception.InsufficientCapacityException;
+import com.cloud.exception.InsufficientServerCapacityException;
+import com.cloud.exception.InvalidParameterValueException;
+import com.cloud.exception.ManagementServerException;
+import com.cloud.exception.OperationTimedoutException;
+import com.cloud.exception.PermissionDeniedException;
+import com.cloud.exception.ResourceAllocationException;
+import com.cloud.exception.ResourceUnavailableException;
+import com.cloud.exception.StorageUnavailableException;
+import com.cloud.exception.UnsupportedServiceException;
+import com.cloud.exception.VirtualMachineMigrationException;
+import com.cloud.exception.AccountLimitException;
 import org.apache.cloudstack.acl.ControlledEntity;
 import org.apache.cloudstack.acl.ControlledEntity.ACLType;
 import org.apache.cloudstack.acl.SecurityChecker.AccessType;
@@ -207,22 +224,6 @@ import com.cloud.event.EventTypes;
 import com.cloud.event.UsageEventUtils;
 import com.cloud.event.UsageEventVO;
 import com.cloud.event.dao.UsageEventDao;
-import com.cloud.exception.AffinityConflictException;
-import com.cloud.exception.AgentUnavailableException;
-import com.cloud.exception.CloudException;
-import com.cloud.exception.ConcurrentOperationException;
-import com.cloud.exception.InsufficientAddressCapacityException;
-import com.cloud.exception.InsufficientCapacityException;
-import com.cloud.exception.InsufficientServerCapacityException;
-import com.cloud.exception.InvalidParameterValueException;
-import com.cloud.exception.ManagementServerException;
-import com.cloud.exception.OperationTimedoutException;
-import com.cloud.exception.PermissionDeniedException;
-import com.cloud.exception.ResourceAllocationException;
-import com.cloud.exception.ResourceUnavailableException;
-import com.cloud.exception.StorageUnavailableException;
-import com.cloud.exception.UnsupportedServiceException;
-import com.cloud.exception.VirtualMachineMigrationException;
 import com.cloud.gpu.GPU;
 import com.cloud.ha.HighAvailabilityManager;
 import com.cloud.host.Host;
@@ -1363,34 +1364,13 @@ public class UserVmManagerImpl extends ManagerBase implements UserVmManager, Vir
                 throw new CloudRuntimeException("Network " + network.getName() + " already has a vm with host name: " + vmInstance.getHostName());
             }
         }
-        List<NicVO> totalNics = _nicDao.listByVmId(vmInstance.getId());
-        List<Long> networkIdList = new ArrayList<>();
-        List<UserVmVO> userVMs = _vmDao.listByAccountId(vmInstance.getAccountId());
-        if (s_logger.isDebugEnabled()) {
-            s_logger.debug("User: " + vmOwner.getAccountName() + " has " + userVMs.size() + " VMs");
-        }
-        for (UserVmVO userVM : userVMs) {
-            List<NicVO> nics = _nicDao.listByVmId(userVM.getId());
-            totalNics.addAll(nics);
-        }
-        if (s_logger.isDebugEnabled()) {
-            s_logger.debug("User: " + vmOwner.getAccountName() + " has " + totalNics.toString() + " NICs");
-        }
-        int guestNetworksUsed = 0;
-        for (NicVO nic : totalNics) {
-            NetworkVO networkFromNic = _networkDao.findById(nic.getNetworkId());
-            if (networkFromNic.getGuestType() == Network.GuestType.Shared) {
-                guestNetworksUsed++;
-                if (s_logger.isDebugEnabled()) {
-                    s_logger.debug("adding Shared guest network from instance: " + nic.getInstanceId() + " to total. guest networks: " + guestNetworksUsed);
-                }
+        if (network.getGuestType() == Network.GuestType.Shared) {
+            try {
+                _resourceLimitMgr.checkResourceLimit(vmOwner, ResourceType.shared_guest_network);
+            } catch (ResourceAllocationException ex) {
+                s_logger.warn("Failed to allocate resource of type " + ex.getResourceType() + " for account " + vmOwner.getAccountName());
+                throw new AccountLimitException("Maximum number of guest networks for account: " + vmOwner.getAccountName());
             }
-        }
-            if (s_logger.isDebugEnabled()) {
-                s_logger.debug("Guest networks used: " + guestNetworksUsed);
-            }
-        if (guestNetworksUsed >= 3 && network.getGuestType() == Network.GuestType.Shared) {
-            throw new CloudRuntimeException("Maximum number of guest networks for account: " + vmOwner.getAccountName());
         }
 
         NicProfile guestNic = null;
