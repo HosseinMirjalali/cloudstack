@@ -1363,32 +1363,8 @@ public class UserVmManagerImpl extends ManagerBase implements UserVmManager, Vir
                 throw new CloudRuntimeException("Network " + network.getName() + " already has a vm with host name: " + vmInstance.getHostName());
             }
         }
-        List<NicVO> totalNics = _nicDao.listByVmId(vmInstance.getId());
-        List<Long> networkIdList = new ArrayList<>();
-        List<UserVmVO> userVMs = _vmDao.listByAccountId(vmInstance.getAccountId());
-        if (s_logger.isDebugEnabled()) {
-            s_logger.debug("User: " + vmOwner.getAccountName() + " has " + userVMs.size() + " VMs");
-        }
-        for (UserVmVO userVM : userVMs) {
-            List<NicVO> nics = _nicDao.listByVmId(userVM.getId());
-            totalNics.addAll(nics);
-        }
-        if (s_logger.isDebugEnabled()) {
-            s_logger.debug("User: " + vmOwner.getAccountName() + " has " + totalNics.toString() + " NICs");
-        }
-        int guestNetworksUsed = 0;
-        for (NicVO nic : totalNics) {
-            NetworkVO networkFromNic = _networkDao.findById(nic.getNetworkId());
-            if (networkFromNic.getGuestType() == Network.GuestType.Shared) {
-                guestNetworksUsed++;
-                if (s_logger.isDebugEnabled()) {
-                    s_logger.debug("adding Shared guest network from instance: " + nic.getInstanceId() + " to total. guest networks: " + guestNetworksUsed);
-                }
-            }
-        }
-            if (s_logger.isDebugEnabled()) {
-                s_logger.debug("Guest networks used: " + guestNetworksUsed);
-            }
+        long guestNetworksUsed = _nicDao.countByAccountAndNetworkGuestType(vmInstance.getAccountId(), Network.GuestType.Shared);
+        s_logger.info("Account " + vmOwner.getAccountName() + " has " + guestNetworksUsed + " shared guest networks.");
         if (guestNetworksUsed >= 3 && network.getGuestType() == Network.GuestType.Shared) {
             throw new CloudRuntimeException("Maximum number of guest networks for account: " + vmOwner.getAccountName());
         }
