@@ -814,11 +814,10 @@ public class NetworkOrchestrator extends ManagerBase implements NetworkOrchestra
                         }
                 }
                 if (addingSharedGuestNetwork) {
-                    try {
-                        _resourceLimitMgr.checkResourceLimit(vm.getOwner(), ResourceType.shared_guest_network);
-                    } catch (ResourceAllocationException ex) {
-                        s_logger.warn("Failed to allocate resource of type " + ex.getResourceType() + " for account " + vm.getOwner().getAccountName());
-                        throw new AccountLimitException("Maximum number of guest networks for account: " + vm.getOwner().getAccountName());
+                    long limit = _resourceLimitMgr.findCorrectResourceLimitForAccount(vm.getOwner().getAccountId(), null, ResourceType.shared_guest_network);
+                    long count = _nicDao.countByAccountAndNetworkGuestType(vm.getOwner().getAccountId(), Network.GuestType.Shared);
+                    if (count >= limit) {
+                        throw new AccountLimitException("Maximum number of shared guest networks for account: " + vm.getOwner().getAccountName());
                     }
                 }
                 for (Pair<Network, NicProfile> networkNicPair : profilesList) {

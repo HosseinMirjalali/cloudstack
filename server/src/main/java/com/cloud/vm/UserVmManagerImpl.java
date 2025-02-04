@@ -1365,11 +1365,11 @@ public class UserVmManagerImpl extends ManagerBase implements UserVmManager, Vir
             }
         }
         if (network.getGuestType() == Network.GuestType.Shared) {
-            try {
-                _resourceLimitMgr.checkResourceLimit(vmOwner, ResourceType.shared_guest_network);
-            } catch (ResourceAllocationException ex) {
-                s_logger.warn("Failed to allocate resource of type " + ex.getResourceType() + " for account " + vmOwner.getAccountName());
-                throw new AccountLimitException("Maximum number of guest networks for account: " + vmOwner.getAccountName());
+            long limit = _resourceLimitMgr.findCorrectResourceLimitForAccount(vmOwner.getAccountId(), null, ResourceType.shared_guest_network);
+            s_logger.info("Resource limit for " + vmOwner.getAccountName() + " is " + limit);
+            long count = _nicDao.countByAccountAndNetworkGuestType(vmOwner.getAccountId(), Network.GuestType.Shared);
+            if (count >= limit) {
+                throw new AccountLimitException("Maximum number of shared guest networks for account: " + vmOwner.getAccountName());
             }
         }
 
