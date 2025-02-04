@@ -1501,7 +1501,7 @@ public class UserVmManagerImpl extends ManagerBase implements UserVmManager, Vir
         if (!nicremoved) {
             throw new CloudRuntimeException("Unable to remove " + network + " from " + vmInstance);
         }
-
+        _resourceLimitMgr.decrementResourceCount(vmInstance.getAccountId(), ResourceType.shared_guest_network, 1L);
         s_logger.debug("Successful removal of " + network + " from " + vmInstance);
         return _vmDao.findById(vmInstance.getId());
     }

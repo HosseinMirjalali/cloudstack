@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.naming.ConfigurationException;
 
+import com.cloud.exception.AccountLimitException;
 import com.cloud.server.ManagementServer;
 import org.apache.cloudstack.acl.ControlledEntity.ACLType;
 import org.apache.cloudstack.annotation.AnnotationService;
@@ -813,31 +814,11 @@ public class NetworkOrchestrator extends ManagerBase implements NetworkOrchestra
                         }
                 }
                 if (addingSharedGuestNetwork) {
-                    List<VMInstanceVO> userVMs = _vmDao.listByAccountId(vm.getOwner().getAccountId());
-                    if (s_logger.isDebugEnabled()) {
-                        s_logger.debug("User: " + vm.getOwner().getAccountName() + " has " + userVMs.size() + " VMs");
-                    }
-                    for (VMInstanceVO userVM : userVMs) {
-                        List<NicVO> userNics = _nicDao.listByVmId(userVM.getId());
-                        totalNics.addAll(userNics);
-                    }
-                    for (NicVO nic : totalNics) {
-                        networkIdList.add(nic.getNetworkId());
-                    }
-                    for (Long networkIdFromNics: networkIdList) {
-                        NetworkVO networkFromNic = _networksDao.findById(networkIdFromNics);
-                        if (s_logger.isDebugEnabled()) {
-                            s_logger.debug("network id:" + networkFromNic.getId() + " with type: " + networkFromNic.getGuestType());
-                        }
-                        if (networkFromNic.getGuestType() == Network.GuestType.Shared) {
-                            guestNetworksUsed++;
-                        }
-                    }
-                    if (s_logger.isDebugEnabled()) {
-                        s_logger.debug("Total guest networks: " + guestNetworksUsed);
-                    }
-                    if (guestNetworksUsed > 3) {
-                        throw new CloudRuntimeException("Maximum number of guest networks for account: " + vm.getOwner().getAccountName());
+                    try {
+                        _resourceLimitMgr.checkResourceLimit(vm.getOwner(), ResourceType.shared_guest_network);
+                    } catch (ResourceAllocationException ex) {
+                        s_logger.warn("Failed to allocate resource of type " + ex.getResourceType() + " for account " + vm.getOwner().getAccountName());
+                        throw new AccountLimitException("Maximum number of guest networks for account: " + vm.getOwner().getAccountName());
                     }
                 }
                 for (Pair<Network, NicProfile> networkNicPair : profilesList) {

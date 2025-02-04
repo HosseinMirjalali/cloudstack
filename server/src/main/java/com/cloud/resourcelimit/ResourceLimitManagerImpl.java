@@ -30,9 +30,6 @@ import javax.inject.Inject;
 import javax.naming.ConfigurationException;
 
 import com.cloud.network.Network;
-import com.cloud.network.dao.NetworkVO;
-import com.cloud.vm.NicVO;
-import com.cloud.vm.VMInstanceVO;
 import com.cloud.vm.dao.NicDao;
 import org.apache.cloudstack.acl.SecurityChecker.AccessType;
 import org.apache.cloudstack.context.CallContext;
@@ -474,6 +471,7 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
         String messageSuffix = " amount of resources of Type = '" + type + "' for " + (project == null ? "Account Name = " + account.getAccountName() : "Project Name = " + project.getName())
                 + " in Domain Id = " + account.getDomainId() + " is exceeded: Account Resource Limit = " + convertedAccountResourceLimit + ", Current Account Resource Amount = " + convertedCurrentResourceCount
                 + ", Requested Resource Amount = " + convertedNumResources + ".";
+        s_logger.info(messageSuffix);
 
         if (s_logger.isDebugEnabled()) {
             s_logger.debug("Checking if" + messageSuffix);
@@ -1052,22 +1050,23 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
     }
 
     public long countSharedGuestNetworksForAccount(long accountId) {
-        List<VMInstanceVO> userVMs = _vmDao.listByAccountId(accountId);
-        List<NicVO> totalNics = new ArrayList<>(List.of());
-        if (s_logger.isDebugEnabled()) {
-            s_logger.debug("Account: " + accountId + " has " + userVMs.size() + " VMs");
-        }
-        for (VMInstanceVO userVM : userVMs) {
-            List<NicVO> nics = _nicDao.listByVmId(userVM.getId());
-            totalNics.addAll(nics);
-        }
-        int guestNetworksUsed = 0;
-        for (NicVO nic : totalNics) {
-            NetworkVO networkFromNic = _networkDao.findById(nic.getNetworkId());
-            if (networkFromNic.getGuestType() == Network.GuestType.Shared) {
-                guestNetworksUsed++;
-            }
-        }
+//        List<VMInstanceVO> userVMs = _vmDao.listByAccountId(accountId);
+//        List<NicVO> totalNics = new ArrayList<>(List.of());
+//        if (s_logger.isDebugEnabled()) {
+//            s_logger.debug("Account: " + accountId + " has " + userVMs.size() + " VMs");
+//        }
+//        for (VMInstanceVO userVM : userVMs) {
+//            List<NicVO> nics = _nicDao.listByVmId(userVM.getId());
+//            totalNics.addAll(nics);
+//        }
+//        int guestNetworksUsed = 0;
+//        for (NicVO nic : totalNics) {
+//            NetworkVO networkFromNic = _networkDao.findById(nic.getNetworkId());
+//            if (networkFromNic.getGuestType() == Network.GuestType.Shared) {
+//                guestNetworksUsed++;
+//            }
+//        }
+        long guestNetworksUsed = _nicDao.countByAccountAndNetworkGuestType(accountId, Network.GuestType.Shared);
         if (s_logger.isDebugEnabled()) {
             s_logger.debug("Account: " + accountId + " has " + guestNetworksUsed + "shared guest networks.");
         }
