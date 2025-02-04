@@ -790,36 +790,33 @@ public class NetworkOrchestrator extends ManagerBase implements NetworkOrchestra
                 Arrays.fill(deviceIds, false);
 
                 List<Pair<Network, NicProfile>> profilesList = getOrderedNetworkNicProfileMapping(networks);
-                final List<NicProfile> nics = new ArrayList<NicProfile>(size);
                 NicProfile defaultNic = null;
                 Network nextNetwork = null;
-                List<Long> networkIdList = new ArrayList<>();
-                int guestNetworksUsed = 0;
-                boolean addingSharedGuestNetwork = false;
+                int sharedGuestNetworksToAdd = 0;
                 if (s_logger.isDebugEnabled()) {
                     s_logger.debug("network size of the VM is: " + networks.size());
                 }
-                List<NicVO> totalNics = new ArrayList<>(List.of());
                 for (Pair<Network, NicProfile> networkNicPair : profilesList) {
                     Network n = networkNicPair.first();
                     if (n.getGuestType() == GuestType.Shared) {
-                        guestNetworksUsed++;
-                        addingSharedGuestNetwork = true;
+                        sharedGuestNetworksToAdd++;
                         if (s_logger.isDebugEnabled()) {
-                            s_logger.debug("Adding " + n.getName() + " to guest networks, current count is: " + guestNetworksUsed);
+                            s_logger.debug("Adding " + n.getName() + " to guest networks, current count is: " + sharedGuestNetworksToAdd);
                         }
                     }
                         if (s_logger.isDebugEnabled()) {
                             s_logger.debug("network " + n.getName() + " is of type: " + n.getGuestType());
                         }
                 }
-                if (addingSharedGuestNetwork) {
+                if (sharedGuestNetworksToAdd > 0) {
                     long limit = _resourceLimitMgr.findCorrectResourceLimitForAccount(vm.getOwner().getAccountId(), null, ResourceType.shared_guest_network);
-                    long count = _nicDao.countByAccountAndNetworkGuestType(vm.getOwner().getAccountId(), Network.GuestType.Shared);
-                    if (count >= limit) {
+                    long existingCount = _nicDao.countByAccountAndNetworkGuestType(vm.getOwner().getAccountId(), Network.GuestType.Shared);
+                    long totalCount = existingCount + sharedGuestNetworksToAdd;
+                    if (totalCount >= limit) {
                         throw new AccountLimitException("Maximum number of shared guest networks for account: " + vm.getOwner().getAccountName());
                     }
                 }
+                final List<NicProfile> nics = new ArrayList<NicProfile>(size);
                 for (Pair<Network, NicProfile> networkNicPair : profilesList) {
                     nextNetwork = networkNicPair.first();
                     Pair<NicProfile, Integer> newDeviceInfo = addRequestedNicToNicListWithDeviceNumberAndRetrieveDefaultDevice(networkNicPair.second(), deviceIds, deviceId, nextNetwork, nics, defaultNic);
