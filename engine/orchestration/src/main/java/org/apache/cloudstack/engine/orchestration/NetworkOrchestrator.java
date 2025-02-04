@@ -812,7 +812,7 @@ public class NetworkOrchestrator extends ManagerBase implements NetworkOrchestra
                     long limit = _resourceLimitMgr.findCorrectResourceLimitForAccount(vm.getOwner().getAccountId(), null, ResourceType.shared_guest_network);
                     long existingCount = _nicDao.countByAccountAndNetworkGuestType(vm.getOwner().getAccountId(), Network.GuestType.Shared);
                     long totalCount = existingCount + sharedGuestNetworksToAdd;
-                    if (totalCount >= limit) {
+                    if (totalCount > limit) {
                         throw new AccountLimitException("Maximum number of shared guest networks for account: " + vm.getOwner().getAccountName());
                     }
                 }
