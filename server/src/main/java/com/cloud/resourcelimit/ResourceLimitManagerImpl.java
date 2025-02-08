@@ -1049,30 +1049,6 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
         }
     }
 
-    public long countSharedGuestNetworksForAccount(long accountId) {
-//        List<VMInstanceVO> userVMs = _vmDao.listByAccountId(accountId);
-//        List<NicVO> totalNics = new ArrayList<>(List.of());
-//        if (s_logger.isDebugEnabled()) {
-//            s_logger.debug("Account: " + accountId + " has " + userVMs.size() + " VMs");
-//        }
-//        for (VMInstanceVO userVM : userVMs) {
-//            List<NicVO> nics = _nicDao.listByVmId(userVM.getId());
-//            totalNics.addAll(nics);
-//        }
-//        int guestNetworksUsed = 0;
-//        for (NicVO nic : totalNics) {
-//            NetworkVO networkFromNic = _networkDao.findById(nic.getNetworkId());
-//            if (networkFromNic.getGuestType() == Network.GuestType.Shared) {
-//                guestNetworksUsed++;
-//            }
-//        }
-        long guestNetworksUsed = _nicDao.countByAccountAndNetworkGuestType(accountId, Network.GuestType.Shared);
-        if (s_logger.isDebugEnabled()) {
-            s_logger.debug("Account: " + accountId + " has " + guestNetworksUsed + "shared guest networks.");
-        }
-        return guestNetworksUsed;
-    }
-
     @Override
     public long getResourceCount(Account account, ResourceType type) {
         return _resourceCountDao.getResourceCount(account.getId(), ResourceOwnerType.Account, type);
