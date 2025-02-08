@@ -809,7 +809,7 @@ public class NetworkOrchestrator extends ManagerBase implements NetworkOrchestra
                         }
                 }
                 if (sharedGuestNetworksToAdd > 0) {
-                    long limit = _resourceLimitMgr.findCorrectResourceLimitForAccount(vm.getOwner().getAccountId(), null, ResourceType.shared_guest_network);
+                    long limit = _resourceLimitMgr.findCorrectResourceLimitForAccount(vm.getOwner(), ResourceType.shared_guest_network);
                     long existingCount = _nicDao.countByAccountAndNetworkGuestType(vm.getOwner().getAccountId(), Network.GuestType.Shared);
                     long totalCount = existingCount + sharedGuestNetworksToAdd;
                     if (totalCount > limit) {
