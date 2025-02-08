@@ -231,6 +231,14 @@ public class AccountResponse extends BaseResponse implements ResourceLimitAndCou
     @Param(description = "the total secondary storage space (in GiB) available to be used for this account", since = "4.2.0")
     private String secondaryStorageAvailable;
 
+    @SerializedName("sharedguestnetworktotal")
+    @Param(description = "the total shared guest network owned by account", since = "4.17.2.0")
+    private Long sharedGuestNetworkTotal;
+
+    @SerializedName("sharedguestnetworkavailable")
+    @Param(description = "the total shared guest network the account can own", since = "4.17.2.0")
+    private Long sharedGuestNetworkAvailable;
+
     @SerializedName(ApiConstants.STATE)
     @Param(description = "the state of the account")
     private String state;
@@ -527,6 +535,11 @@ public class AccountResponse extends BaseResponse implements ResourceLimitAndCou
     @Override
     public void setSecondaryStorageAvailable(String secondaryStorageAvailable) {
         this.secondaryStorageAvailable = secondaryStorageAvailable;
+    }
+
+    @Override
+    public void setSharedGuestNetworkTotal(Long sharedGuestNetworkTotal) {
+        this.sharedGuestNetworkTotal = sharedGuestNetworkTotal;
     }
 
     public void setDefaultZone(String defaultZoneId) {

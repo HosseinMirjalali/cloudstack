@@ -58,6 +58,8 @@ public interface ResourceLimitAndCountResponse {
 
     public void setSecondaryStorageAvailable(String secondaryStorageAvailable);
 
+    public void setSharedGuestNetworkTotal(Long sharedGuestNetworkTotal);
+
     public void setVmLimit(String vmLimit);
 
     public void setVmTotal(Long vmTotal);

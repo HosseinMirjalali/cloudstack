@@ -207,6 +207,7 @@ import com.cloud.event.EventTypes;
 import com.cloud.event.UsageEventUtils;
 import com.cloud.event.UsageEventVO;
 import com.cloud.event.dao.UsageEventDao;
+import com.cloud.exception.AccountLimitException;
 import com.cloud.exception.AffinityConflictException;
 import com.cloud.exception.AgentUnavailableException;
 import com.cloud.exception.CloudException;
@@ -1361,6 +1362,14 @@ public class UserVmManagerImpl extends ManagerBase implements UserVmManager, Vir
             //* verify that there are no duplicates
             if (hostNames.contains(vmInstance.getHostName())) {
                 throw new CloudRuntimeException("Network " + network.getName() + " already has a vm with host name: " + vmInstance.getHostName());
+            }
+        }
+
+        if (network.getGuestType() == Network.GuestType.Shared) {
+            long limit = _resourceLimitMgr.findCorrectResourceLimitForAccount(vmOwner, ResourceType.shared_guest_network);
+            long count = _nicDao.countByAccountAndNetworkGuestType(vmOwner.getAccountId(), Network.GuestType.Shared);
+            if (count >= limit) {
+                throw new AccountLimitException("Maximum number of shared guest networks for account: " + vmOwner.getAccountName());
             }
         }
 

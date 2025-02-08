@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.naming.ConfigurationException;
 
+import com.cloud.exception.AccountLimitException;
 import com.cloud.server.ManagementServer;
 import org.apache.cloudstack.acl.ControlledEntity.ACLType;
 import org.apache.cloudstack.annotation.AnnotationService;
@@ -792,6 +793,30 @@ public class NetworkOrchestrator extends ManagerBase implements NetworkOrchestra
                 final List<NicProfile> nics = new ArrayList<NicProfile>(size);
                 NicProfile defaultNic = null;
                 Network nextNetwork = null;
+                int sharedGuestNetworksToAdd = 0;
+                if (s_logger.isDebugEnabled()) {
+                    s_logger.debug("network size of the VM is: " + networks.size());
+                }
+                for (Pair<Network, NicProfile> networkNicPair : profilesList) {
+                    Network n = networkNicPair.first();
+                    if (n.getGuestType() == GuestType.Shared) {
+                        sharedGuestNetworksToAdd++;
+                        if (s_logger.isDebugEnabled()) {
+                            s_logger.debug("Adding " + n.getName() + " to guest networks, current count is: " + sharedGuestNetworksToAdd);
+                        }
+                    }
+                    if (s_logger.isDebugEnabled()) {
+                        s_logger.debug("network " + n.getName() + " is of type: " + n.getGuestType());
+                    }
+                }
+                if (sharedGuestNetworksToAdd > 0) {
+                    long limit = _resourceLimitMgr.findCorrectResourceLimitForAccount(vm.getOwner(), ResourceType.shared_guest_network);
+                    long existingCount = _nicDao.countByAccountAndNetworkGuestType(vm.getOwner().getAccountId(), Network.GuestType.Shared);
+                    long totalCount = existingCount + sharedGuestNetworksToAdd;
+                    if (totalCount > limit) {
+                        throw new AccountLimitException("Maximum number of shared guest networks for account: " + vm.getOwner().getAccountName());
+                    }
+                }
                 for (Pair<Network, NicProfile> networkNicPair : profilesList) {
                     nextNetwork = networkNicPair.first();
                     Pair<NicProfile, Integer> newDeviceInfo = addRequestedNicToNicListWithDeviceNumberAndRetrieveDefaultDevice(networkNicPair.second(), deviceIds, deviceId, nextNetwork, nics, defaultNic);

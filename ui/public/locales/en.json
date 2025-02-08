@@ -1434,6 +1434,7 @@
 "label.maxuservm": "Max. user VMs",
 "label.maxvolume": "Max. volumes",
 "label.maxvpc": "Max. VPCs",
+"label.maxsharedguest_network": "Max. shared guest networks",
 "label.may.continue": "You may now continue.",
 "label.mb.memory": "MB memory",
 "label.memallocated": "Mem allocation",
